@@ -9,18 +9,22 @@
 
   <thead>
     <tr>
-      <td>Name</td>
-      <td>Gender</td>
+      <td>Firstname</td>
+      <td>Lastname</td>
       <td>Birthday</td>
+      <td>Email</td>
     </tr>
   </thead>
 
   <tbody>
-    <tr *ngFor="let item of items">
-      <td>{{item.name}}</td>
-      <td>{{item.gender}}</td>
-      <td>{{item.birthday}}</td>
+    <tr *ngFor="let user of users">
+      <td>{{user.firstname}}</td>
+      <td>{{user.lastname}}</td>
+      <td>{{user.birthday}}</td>
+      <td>{{user.email}}</td>
     </tr>
   </tbody>
 
 </table>
+
+<button (click)="addUser()">Add user</button>
