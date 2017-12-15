@@ -18,8 +18,8 @@
 
   <tbody>
     <tr *ngFor="let user of users">
-      <td>{{user.firstname}}</td>
-      <td>{{user.lastname}}</td>
+      <td>{{user.name.firstname}}</td>
+      <td>{{user.name.lastname}}</td>
       <td>{{user.birthday}}</td>
       <td>{{user.email}}</td>
     </tr>
@@ -27,4 +27,4 @@
 
 </table>
 
-<button (click)="addUser()">Add user</button>
+<button (click)="addUser(0)">Add user</button>

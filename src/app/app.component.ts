@@ -17,20 +17,16 @@ export class AppComponent implements OnInit, OnDestroy {
   private onDestroy$ = new Subject<void>();
 
   user: Observable<firebase.User>;
-  users: any[];
-
-  collectionUsers;
+  users;
 
   constructor(public angularFireAuth: AngularFireAuth,
-    public angularFirestore: AngularFirestore) {
+    public db: AngularFirestore) {
     this.angularFireAuth.auth.signInAnonymously();
     this.user = this.angularFireAuth.authState;
-    this.collectionUsers = this.angularFirestore.collection('users');
   }
 
   ngOnInit() {
     this.fetchUsers();
-    this.fetchUser();
   }
 
   ngOnDestroy() {
@@ -39,31 +35,28 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   fetchUsers = function () {
-    this.collectionUsers
+    this.db.collection('users')
       .valueChanges()
       .takeUntil(this.onDestroy$)
       .subscribe(res => {
+        console.log('fetchUsers: valueChanges: res: ', res);
         this.users = res;
-        console.log('this.users: ', this.users);
       });
 
-
-    this.collectionUsers
+    this.db.collection('users')
       .snapshotChanges()
       .takeUntil(this.onDestroy$)
       .subscribe(res => {
-        this.users = res;
-        console.log('this.users: ', this.users);
+        console.log('fetchUsers: snapshotChanges: res: ', res);
       });
 
   };
 
-
-  fetchUser = function () {
-    this.angularFirestore.doc('users/MNDJgw0r6pTTheBkfqek')
+  fetchUser2 = function (id) {
+    this.db.collection('users').doc(id)
       .valueChanges()
       .takeUntil(this.onDestroy$)
-      .subscribe(res => console.log(res));
+      .subscribe(res => console.log('fetchUser2: res: ', res));
   }
 
   updateUser(user) {
@@ -71,7 +64,24 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   addUser(user) {
-    this.collectionUsers.add({ 'firstname': 'Thomas', 'lastname': 'Nielsen', 'birthday': 1982, 'email': 'tn@proreact.dk' });
+    this.db.collection('users').add(
+      {
+        'name': {
+          'firstname': 'Thomas',
+          'lastname': 'Nielsen'
+        },
+        'birthday': 1982,
+        'email': 'tn@proreact.dk',
+        'timestamp': new Date()
+      }).then(docRef => {
+        console.log('addUser: docRef: ', docRef);
+      }).catch(error => {
+        console.error('addUser: error: ', error);
+      });
   }
 
-}
+// $state.go('activity', {'id': 1});
+
+// activity/:id
+
+// $stateParams.id
