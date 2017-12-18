@@ -13,13 +13,17 @@ import { AppComponent } from './app.component';
 import { UsersComponent } from './users/users.component';
 import { LoginComponent } from './login/login.component';
 import { SharedNavigationComponent } from './shared/shared-navigation/shared-navigation.component';
+import { ChatComponent } from './chat/chat.component';
+import { AuthService } from './shared/services/auth.service';
+import { AuthGuard } from './auth.guard';
 
 @NgModule({
   declarations: [
     AppComponent,
     UsersComponent,
     LoginComponent,
-    SharedNavigationComponent
+    SharedNavigationComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule,
@@ -30,7 +34,7 @@ import { SharedNavigationComponent } from './shared/shared-navigation/shared-nav
     NgbModule.forRoot(),
     AppRoutingModule
   ],
-  providers: [],
+  providers: [AuthService, AuthGuard],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

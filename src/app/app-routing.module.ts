@@ -3,10 +3,13 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { LoginComponent } from './login/login.component';
 import { UsersComponent } from './users/users.component';
+import { ChatComponent } from './chat/chat.component';
+import { AuthGuard } from './auth.guard';
 
 const appRoutes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: 'users', component: UsersComponent },
+  { path: 'users', component: UsersComponent, canActivate: [AuthGuard] },
+  { path: 'chat', component: ChatComponent, canActivate: [AuthGuard] },
   {
     path: '',
     redirectTo: '/login',
@@ -17,10 +20,7 @@ const appRoutes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(
-      appRoutes,
-      { enableTracing: true } // <-- debugging purposes only
-    )
+    RouterModule.forRoot(appRoutes)
   ],
   exports: [
     RouterModule
