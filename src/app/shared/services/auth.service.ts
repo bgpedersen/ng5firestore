@@ -7,33 +7,62 @@ import { Observable } from 'rxjs/Observable';
 @Injectable()
 export class AuthService {
 
-  // private user: Observable<firebase.User>;
-  private user;
+  public user: Observable<firebase.User>;
 
   constructor(private angularFireAuth: AngularFireAuth,
     private router: Router) {
-    // this.user = this.angularFireAuth.authState;
-    this.angularFireAuth.authState.map(user => {
-      console.log('AuthService: checkAuthStatus: ', user);
-      this.user = user;
-    });
+    this.user = this.angularFireAuth.authState;
   }
 
-  checkAuthStatus() {
-    return this.user;
+  signup(email: string, password: string) {
+    this.angularFireAuth
+      .auth
+      .createUserWithEmailAndPassword(email, password)
+      .then(value => {
+        console.log('Success!', value);
+      })
+      .catch(error => {
+        console.error('auth.service: signup: error:', error.message);
+      });
   }
 
-  login(type) {
-    if (type === 'google') {
-      this.angularFireAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      this.router.navigate(['/chat']);
+  login(options) {
+    // Google
+    if (options.type === 'google') {
+      this.angularFireAuth
+        .auth
+        .signInWithPopup(new firebase.auth.GoogleAuthProvider())
+        .then(value => {
+          console.log('auth.service: login: succes: ', value);
+          this.router.navigate(['/chat']);
+        }).catch(error => {
+          console.error('auth.service: login: error: ', error.message);
+        });
+    }
+    // Email & Password
+    if (options.type === 'email') {
+      this.angularFireAuth
+        .auth
+        .signInWithEmailAndPassword(options.email, options.password)
+        .then(value => {
+          console.log('auth.service: login: succes: ', value);
+          this.router.navigate(['/chat']);
+        }).catch(error => {
+          console.error('auth.service: login: error: ', error.message);
+        });
     }
   }
 
   logout() {
-    console.log('AuthService: logging out...');
-    this.angularFireAuth.auth.signOut();
-    this.router.navigate(['/login']);
+    this.angularFireAuth
+      .auth
+      .signOut().then(result => {
+        console.log('auth.service: logout: succes: ', result);
+        this.router.navigate(['/login']);
+      }).catch(error => {
+        console.error('auth.service: login: error: ', error);
+      });
+
   }
 
 

@@ -14,17 +14,17 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     // handle any redirects if a user is authenticated
-    let user = this.authService.checkAuthStatus();
-    console.log('login.component: user: ', user);
-    if (user) {
-      // redirect the user
-      this.router.navigate(['/chat']);
-      return;
-    }
+    this.authService.user.map(user => {
+      console.log('LoginComponent: user: ', user);
+      if (user) {
+        this.router.navigate(['/chat']);
+      }
+      return false;
+    });
   }
 
-  login(type) {
-    this.authService.login(type);
+  login(options) {
+    this.authService.login(options);
   }
 
 
