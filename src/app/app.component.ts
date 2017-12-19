@@ -7,6 +7,8 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFirestore, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { OnInit, OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { AuthService } from './shared/services/auth.service';
+import { AlertService } from './shared/services/alert.service';
+import { AlertMessage } from './shared/interfaces/AlertMessage';
 
 @Component({
   selector: 'app-root',
@@ -26,15 +28,30 @@ export class AppComponent implements OnInit, OnDestroy {
   //   this.user = this.angularFireAuth.authState;
   // }
 
-  constructor(private authService: AuthService) {
+  alertMessage: AlertMessage = null;
+
+  constructor(private authService: AuthService,
+    private alertService: AlertService) {
   }
 
-
   ngOnInit() {
-
+    this.alertListener();
   }
 
   ngOnDestroy() {
+  }
+
+  alertListener() {
+    this.alertService.alertEvent
+      .subscribe(value => {
+        console.log('app.component: alertEvent: value: ', value);
+        this.alertMessage = value;
+
+        setTimeout(() => {
+          this.alertMessage = null;
+          console.log('app.component: alertEvent: resetting!');
+        }, 5000);
+      });
   }
 
 

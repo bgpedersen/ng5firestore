@@ -16,6 +16,7 @@ import { SharedNavigationComponent } from './shared/shared-navigation/shared-nav
 import { ChatComponent } from './chat/chat.component';
 import { AuthService } from './shared/services/auth.service';
 import { AuthGuard } from './auth.guard';
+import { AlertService } from './shared/services/alert.service';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,7 @@ import { AuthGuard } from './auth.guard';
     NgbModule.forRoot(),
     AppRoutingModule
   ],
-  providers: [AuthService, AuthGuard],
+  providers: [AuthService, AuthGuard, AlertService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

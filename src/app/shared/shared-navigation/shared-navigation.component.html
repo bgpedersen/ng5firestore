@@ -1,8 +1,14 @@
+<h1>
+  Angular 5 Firestore Cloud
+</h1>
+
 <nav>
-  <a routerLink="/chat"
-    routerLinkActive="active">Chat</a>
-  <a routerLink="/users"
-    routerLinkActive="active">Users</a>
   <button class="btn btn-primary"
+    routerLink="/chat"
+    routerLinkActive="active">Chat</button>
+  <button class="btn btn-primary"
+    routerLink="/users"
+    routerLinkActive="active">Users</button>
+  <button class="btn btn-warning"
     (click)="logout()">Log Out</button>
 </nav>
