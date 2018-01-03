@@ -17,6 +17,7 @@ import { ChatComponent } from './chat/chat.component';
 import { AuthService } from './shared/services/auth.service';
 import { AuthGuard } from './auth.guard';
 import { AlertService } from './shared/services/alert.service';
+import { ActivitiesComponent } from './activities/activities.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { AlertService } from './shared/services/alert.service';
     UsersComponent,
     LoginComponent,
     SharedNavigationComponent,
-    ChatComponent
+    ChatComponent,
+    ActivitiesComponent
   ],
   imports: [
     BrowserModule,

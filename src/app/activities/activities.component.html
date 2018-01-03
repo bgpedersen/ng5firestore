@@ -1,0 +1,22 @@
+<div class="row">
+  <div class="col-xs-12">
+
+    <app-shared-navigation> </app-shared-navigation>
+    <h2>
+      Activities
+    </h2>
+
+    <ul>
+      <li *ngFor="let item of activities">
+        {{item.title}}
+        <ul>
+          <li *ngFor="let signup of item.signups">
+            {{signup.name.firstname}} - {{signup.name.lastname}}<br> Birthday {{signup.birthday}}<br> EMail {{signup.email}}
+          </li>
+        </ul>
+        <hr>
+      </li>
+    </ul>
+
+  </div>
+</div>
