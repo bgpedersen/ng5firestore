@@ -33,7 +33,7 @@ import { ActivitiesComponent } from './activities/activities.component';
   imports: [
     BrowserModule,
     AngularFireModule.initializeApp(environment.firebase),
-    AngularFirestoreModule,
+    AngularFirestoreModule.enablePersistence(),
     AngularFireAuthModule,
     AngularFireDatabaseModule,
     NgbModule.forRoot(),

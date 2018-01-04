@@ -8,12 +8,16 @@ import { AlertService } from './alert.service';
 @Injectable()
 export class AuthService {
 
-  public user: Observable<firebase.User>;
+  private user: Observable<firebase.User>;
 
   constructor(private angularFireAuth: AngularFireAuth,
     private router: Router,
     private alertService: AlertService) {
     this.user = this.angularFireAuth.authState;
+  }
+
+  getUser(): Observable<firebase.User> {
+    return this.user;
   }
 
   signup(email: string, password: string) {

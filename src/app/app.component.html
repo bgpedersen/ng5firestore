@@ -1,12 +1,14 @@
 <div class="container-fluid">
-  <div class="col-xs-12">
+  <div class="row">
+    <div class="col-12">
 
-    <ngb-alert *ngIf="alertMessage"
-      [type]="alertMessage.type"
-      (close)="alertMessage = null">{{ alertMessage.message }}
-    </ngb-alert>
+      <ngb-alert *ngIf="alertMessage"
+        [type]="alertMessage.type"
+        (close)="alertMessage = null">{{ alertMessage.message }}
+      </ngb-alert>
 
-    <router-outlet></router-outlet>
+      <router-outlet></router-outlet>
 
+    </div>
   </div>
 </div>

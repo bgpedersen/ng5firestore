@@ -1,12 +1,28 @@
 <div class="row">
-  <div class="col-xs-12">
+  <div class="col-12">
 
     <app-shared-navigation> </app-shared-navigation>
     <h2>
       Activities
     </h2>
 
-    <!-- <ul>
+    <button (click)="newItem()"
+      class="btn btn-outline-info">New</button>
+
+    <button (click)="createMany(count)"
+      class="btn btn-outline-info">Auto Create #</button>
+    <input type="number"
+      step="1"
+      [(ngModel)]="count">
+
+    <div class="row">
+
+      <div class="col-4">
+        <h3>List of activities
+          <span class="badge badge-pill badge-info">{{itemList ? itemList.length : 0}}</span>
+        </h3>
+
+        <!-- <ul>
       <li *ngFor="let item of activities">
         {{item.title}}
         <ul>
@@ -19,31 +35,79 @@
     </ul> -->
 
 
-    <!-- <ul>
+        <!-- <ul>
       <li *ngFor="let item of activitiesListSnapshot | async">
         {{item.title}}<br> Count: {{item.signupsCount}}
         <hr>
       </li>
     </ul> -->
-    <h1>List of activities</h1>
-    <ul>
-      <li *ngFor="let item of activitiesListStatic">
-        {{item.title}}<br> Count: {{item.signupsCount}}
-        <hr>
-      </li>
-    </ul>
 
-    <h1>1 activity</h1>
-    <div *ngIf="activityStatic">
-      {{activityStatic.title}}<br> Count: {{activityStatic.signupsCount}}
-      <form name="update">
 
-        <input [(ngModel)]="activityStatic.title"
-          name="newTitle">
-        <button (click)="updateOneActivity()">Update</button>
 
-      </form>
+        <ul class="list-group">
+          <li *ngFor="let item of itemList"
+            class="list-group-item"
+            [ngClass]="{'active': editItem && item.id === editItem.id}"
+            (click)="getItem(item.id)">
+            <strong>ID: {{item.id}}</strong> <small>{{item.timestamp | date }}</small>
+            <p>{{item.title}}<br> {{item.description}}
+            </p>
+          </li>
+        </ul>
+
+      </div>
+
+
+
+      <div class="col-8">
+
+        <div *ngIf="editItem">
+          <h4>Item</h4>
+
+          <form name="editItemForm">
+
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input type="text"
+                name="title"
+                class="form-control"
+                placeholder="Title"
+                [(ngModel)]="editItem.title">
+            </div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <input type="text"
+                name="description"
+                class="form-control"
+                placeholder="Description"
+                [(ngModel)]="editItem.description">
+            </div>
+
+            <button (click)="updateItem()"
+              *ngIf="editItem.id"
+              type="submit"
+              class="btn btn-outline-success"
+              [disabled]="!editItem.title">Update</button>
+            <button (click)="createItem()"
+              *ngIf="!editItem.id"
+              type="submit"
+              class="btn btn-outline-success"
+              [disabled]="!editItem.title">Create</button>
+            <button (click)="deleteItem()"
+              *ngIf="editItem.id"
+              class="btn btn-outline-danger">Delete</button>
+            <button (click)="clearItem()"
+              class="btn btn-outline-warning">Cancel</button>
+
+          </form>
+
+        </div>
+
+      </div>
+
+
     </div>
+    <!-- /row -->
 
   </div>
 </div>
