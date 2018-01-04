@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFirestore } from 'angularfire2/firestore';
+import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/forkJoin';
 import { Activity } from '../shared/interfaces/Activity';
@@ -13,7 +13,30 @@ export class ActivitiesComponent implements OnInit {
 
   public activities = [];
 
+  activitiesCollection: AngularFirestoreCollection<Activity>;
+  activitiesDoc: AngularFirestoreDocument<Activity>;
+
+  activitiesList: Observable<Activity[]>;
+
+  activitiesListSnapshot: any;
+  activitiesListStatic: Activity[];
+  activityStatic: Activity;
+
+  newTitle = '';
+
   constructor(public db: AngularFirestore) { }
+
+  ngOnInit() {
+    this.activitiesCollection = this.db.collection('activities');
+    this.activitiesList = this.activitiesCollection.valueChanges();
+
+    // this.getActivities();
+    // this.getActivities2();
+    // this.getActivities3();
+    this.getActivities4();
+    this.getOneActivity();
+  }
+
 
 
 
@@ -81,102 +104,108 @@ export class ActivitiesComponent implements OnInit {
 
 
   // *** EXAMPLE #2 STACKOVERFLOW EXAMPLE https://stackoverflow.com/questions/46568850/what-is-firestore-reference-data-type-good-for?noredirect=1&lq=1
-  getActivities2() {
-    this.db.collection('activities')
-      .snapshotChanges()
-      .map(actions => {
-        console.log('ActivitiesComponent: EXAMPLE #2: activities: actions: ', actions);
-        return actions.map(a => {
-          console.log('ActivitiesComponent: EXAMPLE #2: activities: a: ', a);
-          const data = a.payload.doc.data();
-          const id = a.payload.doc.id;
+  // getActivities2() {
+  //   this.db.collection('activities')
+  //     .snapshotChanges()
+  //     .map(actions => {
+  //       console.log('ActivitiesComponent: EXAMPLE #2: activities: actions: ', actions);
+  //       return actions.map(a => {
+  //         console.log('ActivitiesComponent: EXAMPLE #2: activities: a: ', a);
+  //         const data = a.payload.doc.data();
+  //         const id = a.payload.doc.id;
 
-          if (data.signups) {
-            console.log('ActivitiesComponent: EXAMPLE #2: activities: data.signups: ', data.signups);
-            for (const key in data.signups) {
-              if (!data.signups.hasOwnProperty(key)) {
-                continue;
-              }
-              data.signups[key].get()
-                .then(results => {
-                  console.log('ActivitiesComponent: EXAMPLE #2: activities: data.signups exists: results: ', results);
-                  data.signups[key] = results.data();
-                  return { id, ...data };
-                })
-                .catch(err => console.error(err));
-            }
-          } else {
-            return { id, ...data };
-          }
+  //         if (data.signups) {
+  //           console.log('ActivitiesComponent: EXAMPLE #2: activities: data.signups: ', data.signups);
+  //           for (const key in data.signups) {
+  //             if (!data.signups.hasOwnProperty(key)) {
+  //               continue;
+  //             }
+  //             data.signups[key].get()
+  //               .then(results => {
+  //                 console.log('ActivitiesComponent: EXAMPLE #2: activities: data.signups exists: results: ', results);
+  //                 data.signups[key] = results.data();
+  //                 return { id, ...data };
+  //               })
+  //               .catch(err => console.error(err));
+  //           }
+  //         } else {
+  //           return { id, ...data };
+  //         }
+  //       });
+  //     })
+
+  //     .subscribe(response => {
+  //       console.log('ActivitiesComponent: EXAMPLE #2: activities: response: ', response);
+
+  //     })
+  // }
+
+
+
+  // getActivities3() {
+
+  //   // this.activitiesCollection = this.db.collection('activities', ref => {
+  //   //   // return ref.orderBy('title', 'desc').limit(10);
+  //   //   return ref.where('signupsCount', '>', 0).where('signupsCount', '<', 1000).limit(10);
+  //   // });
+
+  //   this.activitiesListSnapshot = this.activitiesCollection
+  //     .snapshotChanges()
+  //     .map(arr => {
+  //       console.log('getActivities3: arr: ', arr);
+  //       return arr.map(snap => {
+  //         const obj = snap.payload.doc.data();
+  //         obj.id = snap.payload.doc.id;
+
+  //         console.log('getActivities3: obj: ', obj);
+  //         return obj;
+  //       });
+  //     });
+  // }
+
+
+  getActivities4() {
+    this.activitiesCollection
+      .snapshotChanges()
+      .map(arr => {
+        console.log('getActivities4: arr: ', arr);
+        return arr.map(snap => {
+          const obj = snap.payload.doc.data() as Activity;
+          obj.id = snap.payload.doc.id;
+
+          console.log('getActivities4: obj: ', obj);
+          return obj;
         });
       })
-      // .map(data => {
-      //   console.log('ActivitiesComponent: EXAMPLE #2: activities: data: ', data);
-      //   data.forEach(doc => {
-      //     console.log('ActivitiesComponent: EXAMPLE #2: activities: doc: ', doc);
-      //     if (doc.signups) {
-      //       console.log('ActivitiesComponent: EXAMPLE #2: activities: data.signups exists');
-      //       for (const key in doc.signups) {
-      //         if (!doc.signups.hasOwnProperty(key)) {
-      //           continue;
-      //         }
-      //         doc.signups[key].get()
-      //           .then(results => {
-      //             console.log('ActivitiesComponent: EXAMPLE #2: activities: data.signups exists: results: ', results);
-      //             doc.signups[key] = results.data();
-      //             return doc;
-      //           })
-      //           .catch(err => console.error(err));
-      //       }
-      //     }
-      //   })
-      // })
       .subscribe(response => {
-        console.log('ActivitiesComponent: EXAMPLE #2: activities: response: ', response);
-
-        // response.forEach(item => {
-        //   console.log('ActivitiesComponent: EXAMPLE #2: activities: forEach item: ', item);
-
-        //   if (item.signups) {
-        //     for (const key in item.signups) {
-        //       if (!item.signups.hasOwnProperty(key)) {
-        //         continue;
-        //       }
-        //       this.db.doc(item.signups[key])
-        //         .snapshotChanges()
-        //         .then(results => {
-        //           item.userData = results.data()
-        //         })
-        //         .catch(err => console.error(err));
-        //     }
-        //   }
-        // })
-      })
+        console.log('getActivities4: subscribe: response: ', response);
+        this.activitiesListStatic = response;
+      });
   }
 
 
-  // .subscribe(results => {
-  //   console.log('ActivitiesComponent: EXAMPLE #2: activities: results: ', results);
-  //   this.activities = [];
 
-  //   results.forEach(doc => {
-  //     const newItem = doc.data();
-  //     newItem.id = doc.id;
-  //     if (newItem.signups) {
-  //       newItem.signups.snapshotChanges()
-  //         .then(results => { newItem.userData = results.data() })
-  //         .catch(err => console.error(err));
-  //     }
-  //     this.activities.push(newItem);
-  //   });
+  getOneActivity() {
+    this.activitiesDoc = this.db.doc('activities/Rn9bYOKzuglHgah8UTa7');
+    this.activitiesDoc
+      .snapshotChanges()
+      .map(snap => {
+        const obj = snap.payload.data() as Activity;
+        obj.id = snap.payload.id;
 
-  //   console.log('ActivitiesComponent: EXAMPLE #2: this.activities: ', this.activities);
-  // })
-  // .catch((err) => { console.error(err) });
+        console.log('getOneActivity: obj: ', obj);
+        return obj;
+      })
+      .subscribe(response => {
+        console.log('getOneActivity: subscribe: response: ', response);
+        this.activityStatic = response;
+        this.newTitle = response.title;
+      });
+  }
 
-  ngOnInit() {
-    // this.getActivities();
-    this.getActivities2();
+  updateOneActivity() {
+    this.activitiesDoc = this.db.doc('activities/Rn9bYOKzuglHgah8UTa7');
+    this.activitiesDoc.update({ title: this.activityStatic.title });
   }
 
 

@@ -6,7 +6,7 @@
       Activities
     </h2>
 
-    <ul>
+    <!-- <ul>
       <li *ngFor="let item of activities">
         {{item.title}}
         <ul>
@@ -16,7 +16,34 @@
         </ul>
         <hr>
       </li>
+    </ul> -->
+
+
+    <!-- <ul>
+      <li *ngFor="let item of activitiesListSnapshot | async">
+        {{item.title}}<br> Count: {{item.signupsCount}}
+        <hr>
+      </li>
+    </ul> -->
+    <h1>List of activities</h1>
+    <ul>
+      <li *ngFor="let item of activitiesListStatic">
+        {{item.title}}<br> Count: {{item.signupsCount}}
+        <hr>
+      </li>
     </ul>
+
+    <h1>1 activity</h1>
+    <div *ngIf="activityStatic">
+      {{activityStatic.title}}<br> Count: {{activityStatic.signupsCount}}
+      <form name="update">
+
+        <input [(ngModel)]="activityStatic.title"
+          name="newTitle">
+        <button (click)="updateOneActivity()">Update</button>
+
+      </form>
+    </div>
 
   </div>
 </div>
