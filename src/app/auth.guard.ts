@@ -16,7 +16,7 @@ export class AuthGuard implements CanActivate {
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
 
-    return this.authService.user.map(user => {
+    return this.authService.getUser().map(user => {
       console.log('AuthGuard: user: ', user);
       if (user) {
         return true;
