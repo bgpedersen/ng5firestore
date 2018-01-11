@@ -20,6 +20,8 @@ import { AuthService } from './shared/services/auth.service';
 import { AuthGuard } from './auth.guard';
 import { AlertService } from './shared/services/alert.service';
 import { ActivitiesComponent } from './activities/activities.component';
+import { BookingsComponent } from './bookings/bookings.component';
+import { DataService } from './shared/services/data.service';
 
 @NgModule({
   declarations: [
@@ -28,7 +30,8 @@ import { ActivitiesComponent } from './activities/activities.component';
     LoginComponent,
     SharedNavigationComponent,
     ChatComponent,
-    ActivitiesComponent
+    ActivitiesComponent,
+    BookingsComponent
   ],
   imports: [
     BrowserModule,
@@ -40,7 +43,7 @@ import { ActivitiesComponent } from './activities/activities.component';
     AppRoutingModule,
     FormsModule
   ],
-  providers: [AuthService, AuthGuard, AlertService],
+  providers: [AuthService, AuthGuard, AlertService, DataService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

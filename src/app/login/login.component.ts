@@ -18,11 +18,10 @@ export class LoginComponent implements OnInit {
       console.log('LoginComponen: getUser res: ', res);
 
       if (res) {
-        this.router.navigate(['/activities']);
+        this.router.navigate(['/bookings']);
       }
       return false;
-    })
-
+    });
   }
 
   login(options) {
