@@ -24,7 +24,7 @@
 
         <ul class="list-group"
           *ngIf="database">
-          <li *ngFor="let item of database.Activities"
+          <li *ngFor="let item of database.Bookings"
             class="list-group-item">
             <strong>ID: {{item.id}}</strong> <small>{{item.timestamp | date }}</small>
             <p>{{item.title}}<br> {{item.description}}

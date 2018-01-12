@@ -1,3 +1,4 @@
+import { DataService } from './data.service';
 import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -8,12 +9,35 @@ import { AlertService } from './alert.service';
 @Injectable()
 export class AuthService {
 
+  databaseSub: Subscription;
+  database: any;
+
   private user: Observable<firebase.User>;
 
   constructor(private angularFireAuth: AngularFireAuth,
+    private dataService: DataService,
     private router: Router,
     private alertService: AlertService) {
-    this.user = this.angularFireAuth.authState;
+    console.log('AuthService loaded');
+    this.initDatabase();
+    this.insertUserToDatabase();
+  }
+
+  initDatabase() {
+    this.database = this.dataService.databaseGet();
+    this.databaseSub = this.dataService.databaseObservable()
+      .subscribe(database => {
+        this.database = database;
+        console.log('BookingsComponent: this.database: ', this.database);
+      });
+  }
+
+  insertUserToDatabase() {
+
+
+    this.angularFireAuth.authState.subscribe(user => {
+
+    });
   }
 
   getUser(): Observable<firebase.User> {
@@ -43,7 +67,7 @@ export class AuthService {
         .then(value => {
           console.log('auth.service: login: succes: ', value);
           this.alertService.createAlert({ 'type': 'success', 'message': 'Successfully signed in' });
-          this.router.navigate(['/chat']);
+          this.router.navigate(['/bookings']);
         }).catch(error => {
           console.error('auth.service: login: error: ', error.message);
           this.alertService.createAlert({ 'type': 'danger', 'message': 'Error: ' + error.message });
@@ -57,7 +81,7 @@ export class AuthService {
         .then(value => {
           console.log('auth.service: login: succes: ', value);
           this.alertService.createAlert({ 'type': 'success', 'message': 'Successfully signed in' });
-          this.router.navigate(['/chat']);
+          this.router.navigate(['/bookings']);
         }).catch(error => {
           console.error('auth.service: login: error: ', error.message);
           this.alertService.createAlert({ 'type': 'danger', 'message': 'Error: ' + error.message });
@@ -71,7 +95,7 @@ export class AuthService {
         .then(value => {
           console.log('auth.service: login: succes: ', value);
           this.alertService.createAlert({ 'type': 'success', 'message': 'Successfully signed in' });
-          this.router.navigate(['/chat']);
+          this.router.navigate(['/bookings']);
         }).catch(error => {
           console.error('auth.service: login: error: ', error.message);
           this.alertService.createAlert({ 'type': 'danger', 'message': 'Error: ' + error.message });

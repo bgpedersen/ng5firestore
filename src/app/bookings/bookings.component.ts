@@ -13,16 +13,16 @@ export class BookingsComponent implements OnInit, OnDestroy {
   database: any;
 
   constructor(private dataService: DataService) {
-
-    this.databaseSub = dataService.getDatabase().subscribe(database => {
-      this.database = database;
-      console.log('BookingsComponent: this.database: ', this.database);
-    });
-
   }
 
   ngOnInit() {
     console.log('BookingsComponent loaded');
+    this.database = this.dataService.databaseGet();
+    this.databaseSub = this.dataService.databaseObservable()
+      .subscribe(database => {
+        this.database = database;
+        console.log('BookingsComponent: this.database: ', this.database);
+      });
   }
 
   ngOnDestroy() {

@@ -1,5 +1,5 @@
 
-export interface ActivityInterface {
+export interface BookingInterface {
   'id'?: string;
   'title'?: string;
   'description'?: string;
@@ -9,7 +9,7 @@ export interface ActivityInterface {
   'template'?: any;
 }
 
-export class Activity implements ActivityInterface {
+export class Booking implements BookingInterface {
   'id'?: string;
   'title': string;
   'description': string;
@@ -17,7 +17,7 @@ export class Activity implements ActivityInterface {
   'createdAt': Date;
   'updatedAt': Date;
   'template': any;
-  constructor(data: ActivityInterface = {}) {
+  constructor(data: BookingInterface = {}) {
     this.id = data.id ? data.id : null;
     this.title = data.title ? data.title : '';
     this.description = data.description ? data.description : '';

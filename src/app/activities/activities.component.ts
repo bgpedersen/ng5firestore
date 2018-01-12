@@ -232,21 +232,18 @@ export class ActivitiesComponent implements OnInit {
 
 
   createItem() {
-    this.authService.getUser().map(res => {
+    this.authService.getUser()
+      .map(res => {
+        console.log('createItem: getUser: res:', res);
 
-      console.log('createItem: getUser: res:', res);
+        this.activitiesCollection.add(this.editItem)
+          .then(res => {
+            console.log('createItem: res:', res);
+            this.getItem(res.id);
+          })
+          .catch(err => console.error('error: ', err.message));
 
-      this.activitiesCollection.add({
-        title: this.editItem.title,
-        description: this.editItem.description,
-        timestamp: this.editItem.timestamp
-      })
-        .then(res => {
-          this.getItem(res.id);
-        })
-        .catch(err => console.error('error: ', err.message));
-
-    });
+      });
 
   }
 
