@@ -5,6 +5,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
 import { Observable } from 'rxjs/Observable';
 import { AlertService } from './alert.service';
+import { Subscription } from 'rxjs/Subscription';
 
 @Injectable()
 export class AuthService {
@@ -24,11 +25,10 @@ export class AuthService {
   }
 
   initDatabase() {
-    this.database = this.dataService.databaseGet();
     this.databaseSub = this.dataService.databaseObservable()
       .subscribe(database => {
         this.database = database;
-        console.log('BookingsComponent: this.database: ', this.database);
+        console.log('AuthService: this.database: ', this.database);
       });
   }
 
