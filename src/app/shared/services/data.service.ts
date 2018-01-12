@@ -60,7 +60,7 @@ export class DataService {
 
   initServerState() {
     this.fetchActivities();
-    this.fetchActivities();
+    this.fetchBookings();
   }
 
   // Connections

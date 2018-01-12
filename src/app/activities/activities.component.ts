@@ -233,8 +233,8 @@ export class ActivitiesComponent implements OnInit {
 
   createItem() {
     this.authService.getUser()
-      .map(res => {
-        console.log('createItem: getUser: res:', res);
+      .subscribe(user => {
+        console.log('activitiesComponent: createItem: user: ', user);
 
         this.activitiesCollection.add(this.editItem)
           .then(res => {
@@ -242,9 +242,7 @@ export class ActivitiesComponent implements OnInit {
             this.getItem(res.id);
           })
           .catch(err => console.error('error: ', err.message));
-
       });
-
   }
 
 
