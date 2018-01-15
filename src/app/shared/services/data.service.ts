@@ -7,6 +7,7 @@ import { Subject } from 'rxjs/Subject';
 import { Booking } from '../interfaces/Booking';
 import { DatabaseInterface } from '../interfaces/Database';
 import * as firebase from 'firebase/app';
+import { AngularFireAuth } from 'angularfire2/auth';
 
 
 @Injectable()
@@ -26,15 +27,23 @@ export class DataService {
   bookingsCollection: AngularFirestoreCollection<Booking>;
   bookingsDoc: AngularFirestoreDocument<Booking>;
 
-  constructor(public db: AngularFirestore) {
+  constructor(public db: AngularFirestore,
+    private angularFireAuth: AngularFireAuth) {
 
     console.log('dataService init. this.database: ', this.database);
     this.setupReferences();
-    this.initServerState();
   }
 
   // Client Database
-  databaseUpdate(event: { type: string, payload: any }) {
+  databaseUpdate(event: { type: string, payload?: any }) {
+    console.log('DataService: databaseUpdate: event: ', event);
+    if (event.type === 'Clear') {
+      this.database = {
+        'Activities': [],
+        'Bookings': [],
+        'User': {} as firebase.User
+      };
+    }
     if (event.type === 'Activities') {
       this.database.Activities = event.payload;
     }
@@ -45,11 +54,17 @@ export class DataService {
       this.database.User = event.payload;
     }
     // Emit database
+    console.log('DataService: databaseUpdate: this.database: ', this.database);
     this.database$.next(this.database);
   }
 
   databaseObservable(): Observable<any> {
     return this.database$.asObservable();
+  }
+
+  clearDatabase() {
+    this.databaseUpdate({ type: 'Clear' });
+    console.log('DataService: clearDatabase: this.database: ', this.database);
   }
 
   // Setup & Init

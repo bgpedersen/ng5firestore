@@ -1,27 +1,32 @@
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../shared/services/auth.service';
+import { Subscription } from 'rxjs/Subscription';
+import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
+
+  userSub: Subscription;
 
   constructor(private authService: AuthService,
     private router: Router) { }
 
   ngOnInit() {
-    // handle any redirects if a user is authenticated
-    this.authService.getUser().map(res => {
-      console.log('LoginComponen: getUser res: ', res);
-
-      if (res) {
+    // If already logged in, go to booking instead of showing login page
+    this.userSub = this.authService.getUser().subscribe(user => {
+      if (user) {
         this.router.navigate(['/bookings']);
       }
-      return false;
     });
+  }
+
+  ngOnDestroy() {
+    this.userSub.unsubscribe();
   }
 
   login(options) {

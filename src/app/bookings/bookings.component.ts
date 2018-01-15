@@ -17,7 +17,6 @@ export class BookingsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('BookingsComponent loaded');
-    this.database = this.dataService.databaseGet();
     this.databaseSub = this.dataService.databaseObservable()
       .subscribe(database => {
         this.database = database;

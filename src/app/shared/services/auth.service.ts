@@ -10,34 +10,31 @@ import { Subscription } from 'rxjs/Subscription';
 @Injectable()
 export class AuthService {
 
-  databaseSub: Subscription;
-  database: any;
-
   private user: Observable<firebase.User>;
 
   constructor(private angularFireAuth: AngularFireAuth,
     private dataService: DataService,
     private router: Router,
     private alertService: AlertService) {
+
     console.log('AuthService loaded');
-    this.initDatabase();
-    this.insertUserToDatabase();
+    this.user = this.angularFireAuth.authState;
+    this.initUser();
   }
 
-  initDatabase() {
-    this.databaseSub = this.dataService.databaseObservable()
-      .subscribe(database => {
-        this.database = database;
-        console.log('AuthService: this.database: ', this.database);
+  initUser() {
+    this.user
+      .subscribe(user => {
+        if (user) {
+          console.log('AuthService: AUTHENTICATED. user: ', user);
+          this.dataService.databaseUpdate({ type: 'User', payload: user });
+          this.dataService.initServerState();
+        } else {
+          console.log('AuthService: UNAUTHORIZED');
+          this.dataService.clearDatabase();
+          this.router.navigate(['/login']);
+        }
       });
-  }
-
-  insertUserToDatabase() {
-
-
-    this.angularFireAuth.authState.subscribe(user => {
-
-    });
   }
 
   getUser(): Observable<firebase.User> {
@@ -67,7 +64,7 @@ export class AuthService {
         .then(value => {
           console.log('auth.service: login: succes: ', value);
           this.alertService.createAlert({ 'type': 'success', 'message': 'Successfully signed in' });
-          this.router.navigate(['/bookings']);
+          // this.router.navigate(['/bookings']);
         }).catch(error => {
           console.error('auth.service: login: error: ', error.message);
           this.alertService.createAlert({ 'type': 'danger', 'message': 'Error: ' + error.message });
@@ -81,7 +78,7 @@ export class AuthService {
         .then(value => {
           console.log('auth.service: login: succes: ', value);
           this.alertService.createAlert({ 'type': 'success', 'message': 'Successfully signed in' });
-          this.router.navigate(['/bookings']);
+          // this.router.navigate(['/bookings']);
         }).catch(error => {
           console.error('auth.service: login: error: ', error.message);
           this.alertService.createAlert({ 'type': 'danger', 'message': 'Error: ' + error.message });
@@ -95,7 +92,7 @@ export class AuthService {
         .then(value => {
           console.log('auth.service: login: succes: ', value);
           this.alertService.createAlert({ 'type': 'success', 'message': 'Successfully signed in' });
-          this.router.navigate(['/bookings']);
+          // this.router.navigate(['/bookings']);
         }).catch(error => {
           console.error('auth.service: login: error: ', error.message);
           this.alertService.createAlert({ 'type': 'danger', 'message': 'Error: ' + error.message });
@@ -106,10 +103,10 @@ export class AuthService {
   logout() {
     this.angularFireAuth
       .auth
-      .signOut().then(result => {
-        console.log('auth.service: logout: succes: ', result);
+      .signOut().then(() => {
+        console.log('auth.service: logout: succes');
         this.alertService.createAlert({ 'type': 'success', 'message': 'Successfully logged out' });
-        this.router.navigate(['/login']);
+        // this.router.navigate(['/login']);
       }).catch(error => {
         console.error('auth.service: login: error: ', error);
         this.alertService.createAlert({ 'type': 'danger', 'message': 'Error: ' + error.message });

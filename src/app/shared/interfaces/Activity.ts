@@ -16,7 +16,7 @@ export class Activity implements ActivityInterface {
   'timestamp': Date;
   'createdAt': Date;
   'updatedAt': Date;
-  'template': any;
+  'template'?: any;
   constructor(data: ActivityInterface = {}) {
     this.id = data.id ? data.id : null;
     this.title = data.title ? data.title : '';
@@ -24,6 +24,6 @@ export class Activity implements ActivityInterface {
     this.timestamp = data.timestamp ? data.timestamp : new Date();
     this.createdAt = data.createdAt ? data.createdAt : new Date();
     this.updatedAt = data.updatedAt ? data.updatedAt : new Date();
-    this.template = data.template ? data.template : {};
+    this.template = data.template ? data.template : null;
   }
 }
