@@ -19,37 +19,15 @@
 
       <div class="col-4">
         <h3>List of activities
-          <span class="badge badge-pill badge-info">{{itemList ? itemList.length : 0}}</span>
+          <span class="badge badge-pill badge-info">{{database.Activities ? database.Activities.length : 0}}</span>
         </h3>
 
-        <!-- <ul>
-      <li *ngFor="let item of activities">
-        {{item.title}}
-        <ul>
-          <li *ngFor="let signup of item.signups">
-            {{signup.name.firstname}} - {{signup.name.lastname}}<br> Birthday {{signup.birthday}}<br> EMail {{signup.email}}
-          </li>
-        </ul>
-        <hr>
-      </li>
-    </ul> -->
-
-
-        <!-- <ul>
-      <li *ngFor="let item of activitiesListSnapshot | async">
-        {{item.title}}<br> Count: {{item.signupsCount}}
-        <hr>
-      </li>
-    </ul> -->
-
-
-
         <ul class="list-group">
-          <li *ngFor="let item of itemList"
+          <li *ngFor="let item of database.Activities"
             class="list-group-item"
             [ngClass]="{'active': editItem && item.id === editItem.id}"
             (click)="getItem(item.id)">
-            <strong>ID: {{item.id}}</strong> <small>{{item.timestamp | date }}</small>
+            <strong>ID: {{item.id}}</strong> <small>{{item.timestamp }}</small>
             <p>{{item.title}}<br> {{item.description}}
             </p>
           </li>

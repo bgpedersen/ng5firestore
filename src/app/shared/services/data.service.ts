@@ -8,6 +8,7 @@ import { Booking } from '../interfaces/Booking';
 import { DatabaseInterface } from '../interfaces/Database';
 import * as firebase from 'firebase/app';
 import { AngularFireAuth } from 'angularfire2/auth';
+import { Subscription } from 'rxjs/Subscription';
 
 
 @Injectable()
@@ -22,16 +23,14 @@ export class DataService {
   // private database$ = new Subject<any>();
   private database$ = new BehaviorSubject<DatabaseInterface>(this.database);
 
-  activitiesCollection: AngularFirestoreCollection<Activity>;
-  activitiesDoc: AngularFirestoreDocument<Activity>;
-  bookingsCollection: AngularFirestoreCollection<Booking>;
-  bookingsDoc: AngularFirestoreDocument<Booking>;
+  refSubs = {
+    'activitySub': null as Subscription,
+    'bookingSub': null as Subscription
+  };
 
   constructor(public db: AngularFirestore,
     private angularFireAuth: AngularFireAuth) {
-
     console.log('dataService init. this.database: ', this.database);
-    this.setupReferences();
   }
 
   // Client Database
@@ -67,20 +66,23 @@ export class DataService {
     console.log('DataService: clearDatabase: this.database: ', this.database);
   }
 
-  // Setup & Init
-  setupReferences() {
-    this.activitiesCollection = this.db.collection('activities');
-    this.bookingsCollection = this.db.collection('bookings');
+  clearServerRefs() {
+    for (const key in this.refSubs) {
+      if (this.refSubs[key]) {
+        this.refSubs[key].unsubscribe();
+      }
+    }
+    console.log('DataService: clearServerRefs: this.refSubs: ', this.refSubs);
   }
 
-  initServerState() {
+  initServerRefs() {
     this.fetchActivities();
     this.fetchBookings();
   }
 
   // Connections
   fetchActivities() {
-    this.activitiesCollection
+    this.refSubs.activitySub = this.db.collection('activities')
       .snapshotChanges()
       .map(arr => {
         return arr.map(snap => {
@@ -97,7 +99,7 @@ export class DataService {
 
   // Connections
   fetchBookings() {
-    this.bookingsCollection
+    this.refSubs.bookingSub = this.db.collection('bookings')
       .snapshotChanges()
       .map(arr => {
         return arr.map(snap => {
@@ -114,7 +116,7 @@ export class DataService {
 
   // AUTODATA(){
   //     // ONCE AUTO UPDATE ALL CUSTOM
-  //     this.activitiesCollection
+  //     this.db.collection('activities')
   //     .snapshotChanges()
   //     .map(arr => {
   //       return arr.map(snap => {

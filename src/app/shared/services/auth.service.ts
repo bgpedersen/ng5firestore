@@ -28,9 +28,10 @@ export class AuthService {
         if (user) {
           console.log('AuthService: AUTHENTICATED. user: ', user);
           this.dataService.databaseUpdate({ type: 'User', payload: user });
-          this.dataService.initServerState();
+          this.dataService.initServerRefs();
         } else {
           console.log('AuthService: UNAUTHORIZED');
+          this.dataService.clearServerRefs();
           this.dataService.clearDatabase();
           this.router.navigate(['/login']);
         }
@@ -103,7 +104,8 @@ export class AuthService {
   logout() {
     this.angularFireAuth
       .auth
-      .signOut().then(() => {
+      .signOut()
+      .then(() => {
         console.log('auth.service: logout: succes');
         this.alertService.createAlert({ 'type': 'success', 'message': 'Successfully logged out' });
         // this.router.navigate(['/login']);
