@@ -1,26 +1,55 @@
 <div class="row">
   <div class="col-12">
 
-    <h1>
-      Angular 5 Firestore Cloud
-    </h1>
+    <nav class="navbar navbar-dark bg-primary sticky-top navbar-expand-md py-md-2">
+      <a class="navbar-brand"
+        href="#">Angular 5 Firestore Cloud</a>
+      <button class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+  </button>
 
-    <nav>
-      <button class="btn btn-primary"
-        routerLink="/bookings"
-        routerLinkActive="active">Bookings</button>
-      <button class="btn btn-primary"
-        routerLink="/activities"
-        routerLinkActive="active">Activities</button>
-      <button class="btn btn-primary"
-        routerLink="/chat"
-        routerLinkActive="active">Chat</button>
-      <button class="btn btn-primary"
-        routerLink="/users"
-        routerLinkActive="active">Users</button>
-      <button class="btn btn-warning"
-        (click)="logout()">Log Out</button>
+      <div class="navbar-collapse collapse"
+        id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item py-md-2"><a routerLink="/bookings"
+              routerLinkActive="active"
+              class="nav-link">Bookings</a></li>
+          <li class="nav-item py-md-2"><a routerLink="/activities"
+              routerLinkActive="active"
+              class="nav-link">Activities</a></li>
+          <li class="nav-item py-md-2"><a routerLink="/chat"
+              routerLinkActive="active"
+              class="nav-link"
+              disabled>Chat</a></li>
+          <li class="nav-item py-md-2"><a routerLink="/users"
+              routerLinkActive="active"
+              class="nav-link"
+              disabled>Users</a></li>
+        </ul>
+
+        <ul class="navbar-nav">
+          <li class="nav-item py-md-2"><a class="nav-link">{{database.User.displayName}}</a>
+          </li>
+          <img [src]="database.User.photoURL"
+            alt="photo"
+            *ngIf="database.User.photoURL"
+            class="userPhoto">
+          <li class="nav-item py-md-2"><a (click)="logout()"
+              routerLink="/login"
+              class="nav-link">Logout</a>
+          </li>
+
+        </ul>
+
+
+      </div>
     </nav>
+
 
   </div>
 </div>

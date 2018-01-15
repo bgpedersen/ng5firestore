@@ -50,7 +50,7 @@ export class AppComponent implements OnInit, OnDestroy {
         setTimeout(() => {
           this.alertMessage = null;
           console.log('app.component: alertEvent: resetting!');
-        }, 5000);
+        }, 2000);
       });
   }
 
