@@ -33,11 +33,11 @@
         </ul>
 
         <ul class="navbar-nav">
-          <li class="nav-item py-md-2"><a class="nav-link">{{database.User.displayName}}</a>
+          <li class="nav-item py-md-2"><a class="nav-link">{{user.displayName}}</a>
           </li>
-          <img [src]="database.User.photoURL"
+          <img [src]="user.photoURL"
             alt="photo"
-            *ngIf="database.User.photoURL"
+            *ngIf="user.photoURL"
             class="userPhoto">
           <li class="nav-item py-md-2"><a (click)="logout()"
               routerLink="/login"

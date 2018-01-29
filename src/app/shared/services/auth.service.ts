@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs/Subscription';
 @Injectable()
 export class AuthService {
 
-  private user: Observable<firebase.User>;
+  // private user: Observable<firebase.User>;
 
   constructor(private angularFireAuth: AngularFireAuth,
     private dataService: DataService,
@@ -18,28 +18,21 @@ export class AuthService {
     private alertService: AlertService) {
 
     console.log('AuthService loaded');
-    this.user = this.angularFireAuth.authState;
     this.initUser();
   }
 
   initUser() {
-    this.user
+    this.dataService.database.User$
       .subscribe(user => {
         if (user) {
           console.log('AuthService: AUTHENTICATED. user: ', user);
-          this.dataService.databaseUpdate({ type: 'User', payload: user });
           this.dataService.initServerRefs();
         } else {
           console.log('AuthService: UNAUTHORIZED');
           this.dataService.clearServerRefs();
-          this.dataService.clearDatabase();
           this.router.navigate(['/login']);
         }
       });
-  }
-
-  getUser(): Observable<firebase.User> {
-    return this.user;
   }
 
   signup(email: string, password: string) {

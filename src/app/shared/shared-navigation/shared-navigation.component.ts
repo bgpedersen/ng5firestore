@@ -3,6 +3,7 @@ import { DataService } from '../services/data.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Subscription } from 'rxjs/Subscription';
+import * as firebase from 'firebase';
 
 @Component({
   selector: 'app-shared-navigation',
@@ -11,23 +12,23 @@ import { Subscription } from 'rxjs/Subscription';
 })
 export class SharedNavigationComponent implements OnInit, OnDestroy {
 
-  databaseSub: Subscription;
-  database: DatabaseInterface;
+  userSub: Subscription;
+  user = {} as firebase.User;
 
   constructor(private authService: AuthService,
     private dataService: DataService) { }
 
   ngOnInit() {
     console.log('SharedNavigationComponent loaded');
-    this.databaseSub = this.dataService.databaseObservable()
-      .subscribe(database => {
-        this.database = database;
-        console.log('SharedNavigationComponent: this.database: ', this.database);
+    this.userSub = this.dataService.database.User$
+      .subscribe(user => {
+        this.user = user;
+        console.log('SharedNavigationComponent: this.user: ', this.user);
       });
   }
 
   ngOnDestroy() {
-    this.databaseSub.unsubscribe();
+    this.userSub.unsubscribe();
   }
 
   logout() {

@@ -25,6 +25,6 @@ export class Activity implements ActivityInterface {
     this.timestamp = data.timestamp ? data.timestamp : firebase.database.ServerValue.TIMESTAMP;
     this.createdAt = this.timestamp = data.timestamp ? data.timestamp : firebase.database.ServerValue.TIMESTAMP;
     this.updatedAt = this.timestamp = data.timestamp ? data.timestamp : firebase.database.ServerValue.TIMESTAMP;
-    this.template = data.template ? data.template : null;
+    this.template = data.template ? data.template : {};
   }
 }

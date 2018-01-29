@@ -15,15 +15,19 @@
       step="1"
       [(ngModel)]="count">
 
+    <button [disabled]="activities.length === 0"
+      (click)="deleteAll()"
+      class="btn btn-outline-danger">Delete all</button>
+
     <div class="row">
 
       <div class="col-4">
         <h3>List of activities
-          <span class="badge badge-pill badge-info">{{database.Activities ? database.Activities.length : 0}}</span>
+          <span class="badge badge-pill badge-info">{{activities ? activities.length : 0}}</span>
         </h3>
 
         <ul class="list-group">
-          <li *ngFor="let item of database.Activities"
+          <li *ngFor="let item of activities"
             class="list-group-item"
             [ngClass]="{'active': editItem && item.id === editItem.id}"
             (click)="getItem(item.id)">
