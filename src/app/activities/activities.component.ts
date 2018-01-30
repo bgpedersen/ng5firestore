@@ -34,7 +34,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
 
     // Update new activities on database update
     this.refSubs.databaseSub = this.dataService.databaseUpdate$.subscribe(res => {
-      console.log('ActivityComponent: database updated!');
+      console.log('ActivityComponent: database updated! this.dataService.database: ', this.dataService.database);
       this.getItems();
     });
   }
@@ -45,7 +45,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
 
   getItems() {
     this.activities = this.convertItems(this.dataService.database.Activities);
-    // console.log('ActivityComponent: getItems: this.activities: ', this.activities);
+    console.log('ActivityComponent: getItems: this.activities: ', this.activities);
   }
 
   // Convert items are unique convertions of the items for this component
@@ -53,7 +53,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     for (let i = 0; i < items.length; i++) {
       items[i].template = {
         'listDate': moment(items[i].timestamp).format('HH:mm DDD MMM YYYY')
-      }
+      };
     }
     return items;
   }
@@ -140,6 +140,12 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
   newItem() {
     this.editItem = new Activity();
     console.log('newItem: editItem: ', this.editItem);
+  }
+
+  createOne() {
+    console.log('ActivitiesComponent: createOne: this.editItem: ', this.editItem);
+    this.dataService.createOne({ item: this.editItem, ref: this.dataService.database.ServerRefs.ActivityRef });
+    this.clearItem();
   }
 
   createMany(count) {

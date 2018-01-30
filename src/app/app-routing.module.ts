@@ -7,12 +7,14 @@ import { ChatComponent } from './chat/chat.component';
 import { AuthGuard } from './auth.guard';
 import { ActivitiesComponent } from './activities/activities.component';
 import { BookingsComponent } from './bookings/bookings.component';
+import { GroupsComponent } from './groups/groups.component';
 
 const appRoutes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'users', component: UsersComponent, canActivate: [AuthGuard] },
   { path: 'chat', component: ChatComponent, canActivate: [AuthGuard] },
   { path: 'activities', component: ActivitiesComponent, canActivate: [AuthGuard] },
+  { path: 'groups', component: GroupsComponent, canActivate: [AuthGuard] },
   { path: 'bookings', component: BookingsComponent, canActivate: [AuthGuard] },
   {
     path: '',

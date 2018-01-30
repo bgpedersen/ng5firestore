@@ -22,6 +22,7 @@ import { AlertService } from './shared/services/alert.service';
 import { ActivitiesComponent } from './activities/activities.component';
 import { BookingsComponent } from './bookings/bookings.component';
 import { DataService } from './shared/services/data.service';
+import { GroupsComponent } from './groups/groups.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { DataService } from './shared/services/data.service';
     SharedNavigationComponent,
     ChatComponent,
     ActivitiesComponent,
-    BookingsComponent
+    BookingsComponent,
+    GroupsComponent
   ],
   imports: [
     BrowserModule,

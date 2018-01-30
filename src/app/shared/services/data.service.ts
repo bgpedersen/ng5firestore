@@ -92,7 +92,7 @@ export class DataService {
       .snapshotChanges()
       .map(arr => {
         return arr.map(snap => {
-          console.log('dataService: fetchActivities: subscribe: snap: ', snap);
+          // console.log('dataService: fetchActivities: subscribe: snap: ', snap);
           const obj = snap.payload.doc.data();
           obj.id = snap.payload.doc.id;
           return new Activity(obj);
@@ -102,6 +102,20 @@ export class DataService {
         this.databaseUpdate$.next();
         console.log('dataService: fetchActivities: this.database.Activities: ', this.database.Activities);
       });
+  }
+
+  createOne(options: { item: any, ref: AngularFirestoreCollection<any> }) {
+
+    if (options.item) {
+      options.ref.add(Object.assign({}, options.item))
+        .then(() => {
+          console.log('dataService: createOne: forkJoin done');
+        }).catch(err => {
+          console.error('dataService: createOne: error: ', err);
+        });
+    } else {
+      console.log('dataService: createOne: wrong options! options: ', options);
+    }
   }
 
   createMany(options: { items: any[], ref: AngularFirestoreCollection<any> }) {

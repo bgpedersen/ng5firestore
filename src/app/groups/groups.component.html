@@ -3,7 +3,7 @@
 
     <app-shared-navigation> </app-shared-navigation>
     <h2>
-      Activities
+      Groups
     </h2>
 
     <button (click)="newItem()"
@@ -16,19 +16,19 @@
       max="100"
       [(ngModel)]="count">
 
-    <button [disabled]="activities.length === 0"
+    <button [disabled]="groups.length === 0"
       (click)="deleteAll()"
       class="btn btn-outline-danger">Delete all</button>
 
     <div class="row">
 
       <div class="col-4">
-        <h3>List of activities
-          <span class="badge badge-pill badge-info">{{activities ? activities.length : 0}}</span>
+        <h3>List of groups
+          <span class="badge badge-pill badge-info">{{groups ? groups.length : 0}}</span>
         </h3>
 
         <ul class="list-group">
-          <li *ngFor="let item of activities"
+          <li *ngFor="let item of groups"
             class="list-group-item"
             [ngClass]="{'active': editItem && item.id === editItem.id}"
             (click)="getItem(item.id)">
@@ -71,17 +71,14 @@
               type="submit"
               class="btn btn-outline-success"
               [disabled]="!editItem.title">Update</button>
-
-            <button (click)="createOne()"
+            <button (click)="createItem()"
               *ngIf="!editItem.id"
               type="submit"
               class="btn btn-outline-success"
               [disabled]="!editItem.title">Create</button>
-
             <button (click)="deleteItem()"
               *ngIf="editItem.id"
               class="btn btn-outline-danger">Delete</button>
-
             <button (click)="clearItem()"
               class="btn btn-outline-warning">Cancel</button>
 
