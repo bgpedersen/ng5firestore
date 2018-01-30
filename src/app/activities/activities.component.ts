@@ -16,13 +16,10 @@ import * as moment from 'moment';
 export class ActivitiesComponent implements OnInit, OnDestroy {
 
   refSubs = {
-    'activities': null as Subscription
+    'databaseSub': null as Subscription
   };
 
   count = 10;
-
-  // databaseSub: Subscription;
-  // database: DatabaseInterface;
 
   editItem: Activity;
   activities: Activity[];
@@ -31,33 +28,43 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('ActivitiesComponent loaded');
-    // this.databaseSub = this.dataService.databaseObservable()
-    //   .subscribe(database => {
-    //     this.database = database;
 
-    this.refSubs.activities = this.dataService.database.Activities$.subscribe(response => {
-      // Activity template
-      for (let i = 0; i < response.length; i++) {
-        response[i].template.listDate = moment(response[i].timestamp).format('HH:mm DDD MMM YYYY');
-      }
+    // Init get all items
+    this.getItems();
 
-      this.activities = response;
-
-      console.log('ActivitiesComponent: this.activities: ', this.activities);
+    // Update new activities on database update
+    this.refSubs.databaseSub = this.dataService.databaseUpdate$.subscribe(res => {
+      console.log('ActivityComponent: database updated!');
+      this.getItems();
     });
   }
 
   ngOnDestroy() {
-    this.clearServerRefs();
+    this.clearRefSubs();
   }
 
-  clearServerRefs() {
+  getItems() {
+    this.activities = this.convertItems(this.dataService.database.Activities);
+    // console.log('ActivityComponent: getItems: this.activities: ', this.activities);
+  }
+
+  // Convert items are unique convertions of the items for this component
+  convertItems(items) {
+    for (let i = 0; i < items.length; i++) {
+      items[i].template = {
+        'listDate': moment(items[i].timestamp).format('HH:mm DDD MMM YYYY')
+      }
+    }
+    return items;
+  }
+
+  clearRefSubs() {
     for (const key in this.refSubs) {
       if (this.refSubs[key]) {
         this.refSubs[key].unsubscribe();
       }
     }
-    console.log('ActivitiesComponent: clearServerRefs: this.refSubs: ', this.refSubs);
+    console.log('ActivitiesComponent: clearRefSubs: this.refSubs: ', this.refSubs);
   }
 
   getItem(id) {
@@ -70,8 +77,8 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
   }
 
   deleteAll() {
-    console.log('ActivitiesComponent: deleteAll pressed.');
-    this.dataService.deleteAll('activities');
+    console.log('ActivitiesComponent: deleteAll: this.activities: ', this.activities);
+    this.dataService.deleteAll({ items: this.activities, ref: this.dataService.database.ServerRefs.ActivityRef });
   }
   // this.activitiesDoc = this.activitiesCollection.doc(id);
   // this.activitiesDoc
@@ -136,14 +143,18 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
   }
 
   createMany(count) {
-    // for (let i = 0; i < count; i++) {
-    //   const obj = new Activity({
-    //     title: 'Auto Created #' + i
-    //   });
-    //   this.activitiesCollection.add(obj)
-    //     .then(result => console.log('createMany: result: ', result))
-    //     .catch(err => console.error('error: ', err.message));
-    // }
+    const items = [];
+
+    for (let i = 0; i < count; i++) {
+      const obj = new Activity({
+        title: 'Auto title #' + i,
+        description: 'Auto description #' + i,
+      });
+      items.push(obj);
+    }
+
+    console.log('ActivitiesComponent: createMany: items: ', items);
+    this.dataService.createMany({ items: items, ref: this.dataService.database.ServerRefs.ActivityRef });
   }
 
 

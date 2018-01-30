@@ -16,12 +16,15 @@ import { forkJoin } from 'rxjs/observable/forkJoin';
 export class DataService {
 
   public database: DatabaseInterface = {
-    'Activities$': null as Observable<Activity[]>,
+    'Activities': [] as Activity[],
     'User$': this.angularFireAuth.authState,
-    'ServerRefs': {}
+    'ServerRefs': {
+      'ActivityRef': this.db.collection<Activity>('activities')
+    },
+    'ServerSubs': {}
   };
 
-  // private database$ = new Subject<any>();
+  public databaseUpdate$ = new Subject<any>();
   // private database$ = new BehaviorSubject<DatabaseInterface>(this.database);
 
   // refSubs = {
@@ -31,7 +34,8 @@ export class DataService {
 
   constructor(public db: AngularFirestore,
     private angularFireAuth: AngularFireAuth) {
-    console.log('dataService init. this.database: ', this.database);
+
+    console.log('dataService init. this.database.ServerRefs.ActivityRef: ', this.database.ServerRefs.ActivityRef);
   }
 
   // Client Database
@@ -67,16 +71,16 @@ export class DataService {
   //   console.log('DataService: clearDatabase: this.database: ', this.database);
   // }
 
-  clearServerRefs() {
-    for (const key in this.database.ServerRefs) {
-      if (this.database.ServerRefs[key]) {
-        this.database.ServerRefs[key].unsubscribe();
+  clearServerSubs() {
+    for (const key in this.database.ServerSubs) {
+      if (this.database.ServerSubs[key]) {
+        this.database.ServerSubs[key].unsubscribe();
       }
     }
-    console.log('DataService: clearServerRefs: this.database: ', this.database);
+    console.log('DataService: clearServerSubs: this.database: ', this.database);
   }
 
-  initServerRefs() {
+  initServerSubs() {
     this.fetchActivities();
     // this.fetchBookings();
   }
@@ -84,7 +88,7 @@ export class DataService {
   // Connections
   fetchActivities() {
     // this.refSubs.activitySub = this.db.collection('activities')
-    this.database.ServerRefs.Activities$ = this.db.collection('activities')
+    this.database.ServerSubs.Activities$ = this.database.ServerRefs.ActivityRef
       .snapshotChanges()
       .map(arr => {
         return arr.map(snap => {
@@ -95,7 +99,43 @@ export class DataService {
         });
       }).subscribe(res => {
         this.database.Activities = res;
+        this.databaseUpdate$.next();
+        console.log('dataService: fetchActivities: this.database.Activities: ', this.database.Activities);
       });
+  }
+
+  createMany(options: { items: any[], ref: AngularFirestoreCollection<any> }) {
+    const promises = [];
+
+    if (options.items && options.items.length) {
+      for (let i = 0; i < options.items.length; i++) {
+        promises.push(options.ref.add(Object.assign({}, options.items[i])));
+      }
+      forkJoin(promises).subscribe(() => {
+        console.log('dataService: createMany: forkJoin done');
+      }, (err) => {
+        console.error('dataService: createMany: error: ', err);
+      });
+    } else {
+      console.log('dataService: createMany: wrong options! options: ', options);
+    }
+  }
+
+  deleteAll(options: { items: any[], ref: AngularFirestoreCollection<any> }) {
+    const promises = [];
+
+    if (options.items && options.items.length) {
+      for (let i = 0; i < options.items.length; i++) {
+        promises.push(options.ref.doc(options.items[i].id).delete());
+      }
+      forkJoin(promises).subscribe(() => {
+        console.log('dataService: deleteAll: forkJoin done');
+      }, (err) => {
+        console.error('dataService: deleteAll: error: ', err);
+      });
+    } else {
+      console.log('dataService: deleteAll: wrong options! options: ', options);
+    }
   }
 
   // Connections
@@ -114,48 +154,6 @@ export class DataService {
   //       this.databaseUpdate({ type: 'Bookings', payload: response });
   //     });
   // }
-
-  deleteAll(entityType: string) {
-    // const transactionObservable = this.db.firestore.runTransaction(transaction => {
-
-    //   const observables = [];
-    //   const rel = this.db.collection('activities');
-
-    //   for (let i = 0; i < this.database.Activities.length; i++) {
-    //     const docRef = rel.doc(this.database.Activities[i].id);
-    //     observables.push(transaction.delete(docRef));
-    //   }
-
-    //   return forkJoin(observables);
-    // });
-
-
-  }
-
-  // AUTODATA(){
-  //     // ONCE AUTO UPDATE ALL CUSTOM
-  //     this.db.collection('activities')
-  //     .snapshotChanges()
-  //     .map(arr => {
-  //       return arr.map(snap => {
-  //         const obj = snap.payload.doc.data() as Activity;
-  //         obj.id = snap.payload.doc.id;
-  //         return obj;
-  //       });
-  //     })
-  //     .subscribe(response => {
-  //       console.log('dataService: fetchActivities: subscribe: response: ', response);
-  //       let newArray: Activity[];
-  //       for (let i = 0; i < response.length; i++) {
-  //         let obj = new Activity({
-
-  //         })
-  //         response[i].title = "I changed the title of all";
-  //       }
-  //     });
-  // }
-
-
 
 
 }

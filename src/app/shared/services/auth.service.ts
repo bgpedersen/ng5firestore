@@ -26,10 +26,10 @@ export class AuthService {
       .subscribe(user => {
         if (user) {
           console.log('AuthService: AUTHENTICATED. user: ', user);
-          this.dataService.initServerRefs();
+          this.dataService.initServerSubs();
         } else {
           console.log('AuthService: UNAUTHORIZED');
-          this.dataService.clearServerRefs();
+          this.dataService.clearServerSubs();
           this.router.navigate(['/login']);
         }
       });
