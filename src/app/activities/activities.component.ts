@@ -2,10 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/forkJoin';
-import { Activity } from '../shared/interfaces/Activity';
-import { DatabaseInterface } from '../shared/interfaces/Database';
+import { Activity } from '../core/interfaces/Activity';
+import { DatabaseInterface } from '../core/interfaces/Database';
 import { Subscription } from 'rxjs/Subscription';
-import { DataService } from '../shared/services/data.service';
+import { DataService } from '../core/services/data.service';
 import * as moment from 'moment';
 
 @Component({

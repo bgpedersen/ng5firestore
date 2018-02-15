@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { DataService } from '../shared/services/data.service';
+import { DataService } from '../core/services/data.service';
 import { Subscription } from 'rxjs/Subscription';
-import { DatabaseInterface } from '../shared/interfaces/Database';
+import { DatabaseInterface } from '../core/interfaces/Database';
 
 @Component({
   selector: 'app-bookings',

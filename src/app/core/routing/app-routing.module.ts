@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { LoginComponent } from './login/login.component';
-import { UsersComponent } from './users/users.component';
-import { ChatComponent } from './chat/chat.component';
-import { AuthGuard } from './auth.guard';
-import { ActivitiesComponent } from './activities/activities.component';
-import { BookingsComponent } from './bookings/bookings.component';
-import { GroupsComponent } from './groups/groups.component';
+import { LoginComponent } from '../../login/login.component';
+import { UsersComponent } from '../../users/users.component';
+import { ChatComponent } from '../../chat/chat.component';
+import { ActivitiesComponent } from '../../activities/activities.component';
+import { BookingsComponent } from '../../bookings/bookings.component';
+import { GroupsComponent } from '../../groups/groups.component';
+import { AuthGuard } from '../guard/auth.guard';
 
 const appRoutes: Routes = [
   { path: 'login', component: LoginComponent },
