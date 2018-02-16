@@ -1,0 +1,67 @@
+<div class="row">
+  <div class="col-12">
+
+    <app-shared-navigation> </app-shared-navigation>
+    <h2>
+      Profile
+    </h2>
+
+    <div class="row">
+
+      <div class="col-4">
+
+        <div *ngIf="editItem">
+          <h4>{{editItem.displayName}}</h4>
+
+          <form name="editItemForm">
+
+            <div class="form-group">
+              <label for="displayname">Display name</label>
+              <input type="text"
+                name="displayname"
+                class="form-control"
+                placeholder="Display name"
+                [(ngModel)]="editItem.displayName">
+            </div>
+            <div class="form-group">
+              <label for="email">E-Mail</label>
+              <input type="email"
+                name="email"
+                class="form-control"
+                placeholder="email"
+                [(ngModel)]="editItem.email">
+            </div>
+
+            <button (click)="updateItem(editItem)"
+              type="submit"
+              class="btn btn-outline-success"
+              [disabled]="!editItem.displayName || !editItem.email">Update</button>
+            <!--
+            <button (click)="createOne()"
+              *ngIf="!editItem.id"
+              type="submit"
+              class="btn btn-outline-success"
+              [disabled]="!editItem.title">Create</button>
+
+            <button (click)="deleteItem()"
+              *ngIf="editItem.id"
+              class="btn btn-outline-danger">Delete</button>
+
+            <button (click)="clearItem()"
+              class="btn btn-outline-warning">Cancel</button> -->
+
+          </form>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="col-4"></div>
+      <div class="col-4"></div>
+    </div>
+
+
+  </div>
+</div>

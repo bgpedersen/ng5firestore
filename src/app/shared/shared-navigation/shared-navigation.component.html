@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col-12">
 
-    <nav class="navbar navbar-dark bg-primary sticky-top navbar-expand-md py-md-2">
+    <nav class="navbar navbar-dark bg-primary sticky-top navbar-expand-md">
       <a class="navbar-brand"
         href="#">Angular 5 Firestore Cloud</a>
       <button class="navbar-toggler"
@@ -16,20 +16,20 @@
       <div class="navbar-collapse collapse"
         id="navbarNav">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item py-md-2"><a routerLink="/bookings"
+          <li class="nav-item"><a routerLink="/bookings"
               routerLinkActive="active"
               class="nav-link">Bookings</a></li>
-          <li class="nav-item py-md-2"><a routerLink="/activities"
+          <li class="nav-item"><a routerLink="/activities"
               routerLinkActive="active"
               class="nav-link">Activities</a></li>
-          <li class="nav-item py-md-2"><a routerLink="/groups"
+          <li class="nav-item"><a routerLink="/groups"
               routerLinkActive="active"
               class="nav-link">Groups</a></li>
-          <li class="nav-item py-md-2"><a routerLink="/chat"
+          <li class="nav-item"><a routerLink="/chat"
               routerLinkActive="active"
               class="nav-link"
               disabled>Chat</a></li>
-          <li class="nav-item py-md-2"><a routerLink="/users"
+          <li class="nav-item"><a routerLink="/users"
               routerLinkActive="active"
               class="nav-link"
               disabled>Users</a></li>
@@ -37,20 +37,22 @@
 
         <ul class="navbar-nav"
           *ngIf="user">
-          <li class="nav-item py-md-2"><a class="nav-link">{{user.displayName}}</a>
-          </li>
 
-          <li class="nav-item py-md-2">
-            <img [src]="user.photoURL"
+          <li class="nav-item">
+            <a routerLink="/profile"
+              routerLinkActive="active"
+              class="nav-link">{{user.displayName}}
+              <img [src]="user.photoURL"
               alt="photo"
               *ngIf="user.photoURL"
               class="userPhoto">
+            </a>
           </li>
 
-          <li class="nav-item py-md-2">
+          <li class="nav-item">
             <a (click)="logout()"
               routerLink="/login"
-              class="nav-link logout">Logout
+              class="nav-link logout"><i class="fa fa-sign-out" aria-hidden="true"></i>
             </a>
           </li>
         </ul>

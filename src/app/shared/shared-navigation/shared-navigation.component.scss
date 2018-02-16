@@ -1,9 +1,13 @@
+.nav-link {
+  padding: 0;
+}
+
 .userPhoto {
   width: 3em;
-  height: auto;
   border-radius: 50%;
 }
 
 .logout {
   margin-left: 3em;
+  font-size: 2em;
 }

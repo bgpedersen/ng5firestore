@@ -29,9 +29,9 @@ export class AuthService {
       });
   }
 
-  private updateUserData(user) {
+  updateUserData(user) {
     // Sets user data to firestore on login
-
+    console.log('authService: updateUserData: user: ', user);
     const userRef: AngularFirestoreDocument<any> = this.angularFirestore.doc(`users/${user.uid}`);
 
     const data: User = {

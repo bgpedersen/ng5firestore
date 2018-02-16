@@ -19,6 +19,7 @@ import { ActivitiesComponent } from './activities/activities.component';
 import { BookingsComponent } from './bookings/bookings.component';
 import { GroupsComponent } from './groups/groups.component';
 import { AppRoutingModule } from './app-routing.module';
+import { ProfileComponent } from './profile/profile.component';
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import { AppRoutingModule } from './app-routing.module';
     ChatComponent,
     ActivitiesComponent,
     BookingsComponent,
-    GroupsComponent
+    GroupsComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule,
