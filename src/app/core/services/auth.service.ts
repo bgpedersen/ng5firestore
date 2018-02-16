@@ -38,7 +38,8 @@ export class AuthService {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
-      photoURL: user.photoURL
+      photoURL: user.photoURL,
+      favoriteColor: user.favoriteColor ? user.favoriteColor : null
     };
 
     return userRef.set(data);

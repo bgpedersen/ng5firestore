@@ -32,6 +32,15 @@
                 [(ngModel)]="editItem.email">
             </div>
 
+            <div class="form-group">
+              <label for="favoriteColor">Favorite color</label>
+              <input type="color"
+                name="favoriteColor"
+                class="form-control"
+                [value]="editItem.favoriteColor"
+                [(ngModel)]="editItem.favoriteColor">
+            </div>
+
             <button (click)="updateItem(editItem)"
               type="submit"
               class="btn btn-outline-success"
