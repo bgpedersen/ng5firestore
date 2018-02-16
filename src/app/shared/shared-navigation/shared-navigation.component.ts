@@ -29,7 +29,7 @@ export class SharedNavigationComponent implements OnInit, OnDestroy {
   }
 
   logout() {
-    this.authService.signOut();
+    this.authService.logout();
   }
 
 }

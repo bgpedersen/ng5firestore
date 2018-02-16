@@ -35,18 +35,24 @@
               disabled>Users</a></li>
         </ul>
 
-        <ul class="navbar-nav">
+        <ul class="navbar-nav"
+          *ngIf="user">
           <li class="nav-item py-md-2"><a class="nav-link">{{user.displayName}}</a>
           </li>
-          <img [src]="user.photoURL"
-            alt="photo"
-            *ngIf="user.photoURL"
-            class="userPhoto">
-          <li class="nav-item py-md-2"><a (click)="logout()"
-              routerLink="/login"
-              class="nav-link">Logout</a>
+
+          <li class="nav-item py-md-2">
+            <img [src]="user.photoURL"
+              alt="photo"
+              *ngIf="user.photoURL"
+              class="userPhoto">
           </li>
 
+          <li class="nav-item py-md-2">
+            <a (click)="logout()"
+              routerLink="/login"
+              class="nav-link logout">Logout
+            </a>
+          </li>
         </ul>
 
 

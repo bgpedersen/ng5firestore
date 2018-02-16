@@ -18,6 +18,7 @@ import { ChatComponent } from './chat/chat.component';
 import { ActivitiesComponent } from './activities/activities.component';
 import { BookingsComponent } from './bookings/bookings.component';
 import { GroupsComponent } from './groups/groups.component';
+import { AppRoutingModule } from './app-routing.module';
 
 
 @NgModule({
@@ -39,7 +40,8 @@ import { GroupsComponent } from './groups/groups.component';
     AngularFireDatabaseModule,
     NgbModule.forRoot(),
     FormsModule,
-    CoreModule
+    CoreModule,
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]
