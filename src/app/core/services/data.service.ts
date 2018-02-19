@@ -10,16 +10,20 @@ import * as firebase from 'firebase/app';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Subscription } from 'rxjs/Subscription';
 import { forkJoin } from 'rxjs/observable/forkJoin';
+import { User } from '../interfaces/User';
+import { AuthService } from './auth.service';
 
 
 @Injectable()
 export class DataService {
 
   public database: DatabaseInterface = {
+    'User': {} as User,
     'Activities': [] as Activity[],
-    'User$': this.angularFireAuth.authState,
+    'Users': [] as User[],
     'ServerRefs': {
-      'ActivityRef': this.db.collection<Activity>('activities')
+      'ActivityRef': this.db.collection<Activity>('activities'),
+      'UserRef': this.db.collection<User>('users')
     },
     'ServerSubs': {}
   };
@@ -33,9 +37,18 @@ export class DataService {
   // };
 
   constructor(public db: AngularFirestore,
-    private angularFireAuth: AngularFireAuth) {
-
-    console.log('dataService init. this.database.ServerRefs.ActivityRef: ', this.database.ServerRefs.ActivityRef);
+    private angularFireAuth: AngularFireAuth,
+    private authService: AuthService) {
+    this.authService.user
+      .subscribe(user => {
+        if (user) {
+          this.database.User = user;
+          console.log('DataService: this.database.User: ', this.database.User);
+          this.initServerSubs();
+        } else {
+          this.clearServerSubs();
+        }
+      });
   }
 
   // Client Database
@@ -71,6 +84,8 @@ export class DataService {
   //   console.log('DataService: clearDatabase: this.database: ', this.database);
   // }
 
+
+
   clearServerSubs() {
     for (const key in this.database.ServerSubs) {
       if (this.database.ServerSubs[key]) {
@@ -82,6 +97,7 @@ export class DataService {
 
   initServerSubs() {
     this.fetchActivities();
+    this.fetchUsers();
     // this.fetchBookings();
   }
 
@@ -101,6 +117,23 @@ export class DataService {
         this.database.Activities = res;
         this.databaseUpdate$.next();
         console.log('dataService: fetchActivities: this.database.Activities: ', this.database.Activities);
+      });
+  }
+
+  // Connections
+  fetchUsers() {
+    console.log('DataService: fetchUsers called');
+    this.database.ServerSubs.Users$ = this.database.ServerRefs.UserRef
+      .snapshotChanges()
+      .map(arr => {
+        return arr.map(snap => {
+          const obj = snap.payload.doc.data() as User;
+          return obj;
+        });
+      }).subscribe(res => {
+        this.database.Users = res;
+        this.databaseUpdate$.next();
+        console.log('dataService: fetchUsers: this.database.Users: ', this.database.Users);
       });
   }
 

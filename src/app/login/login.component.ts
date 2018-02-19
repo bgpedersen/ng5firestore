@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       .subscribe(loggedIn => {
         if (loggedIn) {
           console.log('Already logged in');
-          this.router.navigate(['/activities']);
+          this.router.navigate(['/profile']);
         }
       });
   }

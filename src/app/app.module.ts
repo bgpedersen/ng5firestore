@@ -9,6 +9,7 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CoreModule } from './core/core.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 import { AppComponent } from './app.component';
 import { UsersComponent } from './users/users.component';
@@ -43,7 +44,8 @@ import { ProfileComponent } from './profile/profile.component';
     NgbModule.forRoot(),
     FormsModule,
     CoreModule,
-    AppRoutingModule
+    AppRoutingModule,
+    ColorPickerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

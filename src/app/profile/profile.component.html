@@ -34,31 +34,14 @@
 
             <div class="form-group">
               <label for="favoriteColor">Favorite color</label>
-              <input type="color"
-                name="favoriteColor"
-                class="form-control"
-                [value]="editItem.favoriteColor"
-                [(ngModel)]="editItem.favoriteColor">
+              <input [(colorPicker)]="editItem.favoriteColor"
+                [style.background]="editItem.favoriteColor" />
             </div>
 
             <button (click)="updateItem(editItem)"
               type="submit"
               class="btn btn-outline-success"
               [disabled]="!editItem.displayName || !editItem.email">Update</button>
-            <!--
-            <button (click)="createOne()"
-              *ngIf="!editItem.id"
-              type="submit"
-              class="btn btn-outline-success"
-              [disabled]="!editItem.title">Create</button>
-
-            <button (click)="deleteItem()"
-              *ngIf="editItem.id"
-              class="btn btn-outline-danger">Delete</button>
-
-            <button (click)="clearItem()"
-              class="btn btn-outline-warning">Cancel</button> -->
-
           </form>
 
         </div>

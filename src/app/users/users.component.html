@@ -3,8 +3,82 @@
 
     <app-shared-navigation> </app-shared-navigation>
     <h2>
-      User
+      Users
     </h2>
+
+    <div class="row">
+
+      <div class="col-4">
+        <h3>List of users
+          <span class="badge badge-pill badge-info">{{users ? users.length : 0}}</span>
+        </h3>
+
+        <ul class="list-group">
+          <li *ngFor="let item of users"
+            class="list-group-item"
+            [ngClass]="{'active': editItem && item.uid === editItem.uid}"
+            (click)="getItem(item.uid)">
+            <strong>ID: {{item.uid}}</strong>
+            <p>{{item.displayName}}<br> {{item.favoriteColor}}
+            </p>
+          </li>
+        </ul>
+
+      </div>
+
+
+      <div class="col-8">
+
+        <!-- <div *ngIf="editItem">
+          <h4>Item</h4>
+
+          <form name="editItemForm">
+
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input type="text"
+                name="title"
+                class="form-control"
+                placeholder="Title"
+                [(ngModel)]="editItem.title">
+            </div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <input type="text"
+                name="description"
+                class="form-control"
+                placeholder="Description"
+                [(ngModel)]="editItem.description">
+            </div>
+
+            <button (click)="updateItem()"
+              *ngIf="editItem.id"
+              type="submit"
+              class="btn btn-outline-success"
+              [disabled]="!editItem.title">Update</button>
+
+            <button (click)="createOne()"
+              *ngIf="!editItem.id"
+              type="submit"
+              class="btn btn-outline-success"
+              [disabled]="!editItem.title">Create</button>
+
+            <button (click)="deleteItem()"
+              *ngIf="editItem.id"
+              class="btn btn-outline-danger">Delete</button>
+
+            <button (click)="clearItem()"
+              class="btn btn-outline-warning">Cancel</button>
+
+          </form>
+
+        </div> -->
+
+      </div>
+
+
+    </div>
+    <!-- /row -->
 
   </div>
 </div>

@@ -28,7 +28,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.userSub.unsubscribe();
   }
 
-  updateItem(user) {
+  updateItem(user: User) {
     this.authService.updateUserData(user);
   }
 }
