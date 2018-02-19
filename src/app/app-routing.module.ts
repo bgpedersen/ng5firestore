@@ -5,7 +5,6 @@ import { LoginComponent } from './login/login.component';
 import { UsersComponent } from './users/users.component';
 import { ChatComponent } from './chat/chat.component';
 import { ActivitiesComponent } from './activities/activities.component';
-import { BookingsComponent } from './bookings/bookings.component';
 import { GroupsComponent } from './groups/groups.component';
 import { AuthGuard } from './core/guard/auth.guard';
 import { ProfileComponent } from './profile/profile.component';
@@ -17,7 +16,6 @@ const appRoutes: Routes = [
   { path: 'chat', component: ChatComponent, canActivate: [AuthGuard] },
   { path: 'activities', component: ActivitiesComponent, canActivate: [AuthGuard] },
   { path: 'groups', component: GroupsComponent, canActivate: [AuthGuard] },
-  { path: 'bookings', component: BookingsComponent, canActivate: [AuthGuard] },
   {
     path: '',
     redirectTo: '/login',

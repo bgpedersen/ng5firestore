@@ -17,7 +17,6 @@ import { LoginComponent } from './login/login.component';
 import { SharedNavigationComponent } from './shared/shared-navigation/shared-navigation.component';
 import { ChatComponent } from './chat/chat.component';
 import { ActivitiesComponent } from './activities/activities.component';
-import { BookingsComponent } from './bookings/bookings.component';
 import { GroupsComponent } from './groups/groups.component';
 import { AppRoutingModule } from './app-routing.module';
 import { ProfileComponent } from './profile/profile.component';
@@ -31,7 +30,6 @@ import { ProfileComponent } from './profile/profile.component';
     SharedNavigationComponent,
     ChatComponent,
     ActivitiesComponent,
-    BookingsComponent,
     GroupsComponent,
     ProfileComponent
   ],
