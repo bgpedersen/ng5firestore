@@ -44,11 +44,14 @@ export class DataService {
         if (user) {
           this.database.User = user;
           console.log('DataService: this.database.User: ', this.database.User);
-          this.initServerSubs();
+          // this.initServerSubs();
         } else {
           this.clearServerSubs();
         }
       });
+
+    this.fetchActivities();
+    this.fetchUsers();
   }
 
   // Client Database
@@ -95,11 +98,10 @@ export class DataService {
     console.log('DataService: clearServerSubs: this.database: ', this.database);
   }
 
-  initServerSubs() {
-    this.fetchActivities();
-    this.fetchUsers();
-    // this.fetchBookings();
-  }
+  // initServerSubs() {
+  //   this.fetchActivities();
+  //   this.fetchUsers();
+  // }
 
   // Connections
   fetchActivities() {

@@ -29,6 +29,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   updateItem(user: User) {
-    this.authService.updateUserData(user);
+    this.authService.updateUser(user);
   }
 }

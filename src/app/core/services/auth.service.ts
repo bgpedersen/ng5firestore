@@ -29,32 +29,66 @@ export class AuthService {
       });
   }
 
-  updateUserData(user) {
-    // Sets user data to firestore on login
-    console.log('authService: updateUserData: user: ', user);
-    const userRef: AngularFirestoreDocument<any> = this.angularFirestore.doc(`users/${user.uid}`);
+  updateUser(user) {
+    console.log('authService: updateUser: user: ', user);
+    const userRef = this.angularFirestore.doc(`users/${user.uid}`);
+
+    userRef.update(user).then(() => {
+      console.log('authService: updateUser success');
+    }, (error) => {
+      console.log('authService: updateUser error: ', error);
+    });
+  }
+
+  createUser(user) {
+    console.log('authService: createUser: user: ', user);
+    const userRef = this.angularFirestore.doc(`users/${user.uid}`);
 
     const data: User = {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
       photoURL: user.photoURL,
-      favoriteColor: user.favoriteColor ? user.favoriteColor : null
+      favoriteColor: '#FFF'
     };
 
-    return userRef.set(data);
+    userRef.set(data).then(() => {
+      console.log('authService: createUser success');
+    }, (error) => {
+      console.log('authService: createUser error: ', error);
+    });
+  }
+
+  checkIfUserExists(user) {
+    // Sets user data to firestore on login
+    console.log('authService: checkIfUserExists: user: ', user);
+    const userRef = this.angularFirestore.doc(`users/${user.uid}`);
+    return userRef.snapshotChanges()
+      .take(1)
+      .map(snap => {
+        console.log('authService: checkIfUserExists: snap: ', snap);
+        const exists = snap.payload.exists;
+        console.log('authService: checkIfUserExists: exists: ', exists);
+        return exists;
+      });
   }
 
   private oAuthLogin(provider) {
-    return this.angularFireAuth.auth.signInWithPopup(provider)
+    this.angularFireAuth.auth.signInWithPopup(provider)
       .then(credential => {
-        this.updateUserData(credential.user);
+        console.log('authService: oAuthLogin: credential: ', credential);
+        this.checkIfUserExists(credential.user)
+          .subscribe(exists => {
+            if (!exists) {
+              this.createUser(credential.user);
+            }
+          });
       });
   }
 
   googleLogin() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    return this.oAuthLogin(provider);
+    this.oAuthLogin(provider);
   }
 
   logout() {
