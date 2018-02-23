@@ -1,11 +1,5 @@
 # Angular 5 Project with Firebase Cloud Firestore (Ng5firestore)
 
-====== Angular 5 with Firebase Firestore Cloud ======
-
-— //[[bgp@proreact.dk|Bjarne Gerhardt-Pedersen]] 2018/01/29 10:19//—
-
-===== Chapter 1: Angular 5 Project with Firebase setup =====
-
   * Angular 5 built with Angular CLI
   * Project setup in Firebase using Firestore Cloud database
   * AngularFire2 library integrated in app to use Firebase
@@ -57,7 +51,7 @@
       * [[https://angular-5-firestore-cloud.firebaseapp.com/|https://angular-5-firestore-cloud.firebaseapp.com/]]
 
 
-===== Chaper 1.1: Authentication and Users =====
+## Chaper 1.1: Authentication and Users ##
 
 Followed guide: [[https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/|https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/]]
 
@@ -67,7 +61,7 @@ Write about guard, interface,
 
 Next step 5
 
-===== Chapter 2: Firebase Relations and centralized database =====
+## Chapter 2: Firebase Relations and centralized database ##
 
 **Firebase datastructure to include relations ??? **
 
@@ -133,7 +127,7 @@ Old deleted examples with relations concept or no relations at all
   * Example #4: Youtube guide: [[https://www.youtube.com/watch?v=-GjF9pSeFTs&t=8s|https://www.youtube.com/watch?v=-GjF9pSeFTs&t=8s]] getting snapshot data of activities. Creating object with the data and id following an interface, subscribing and saving the static response in a list. Working but no refs.
   * Example #5: Created CRUD with Activities. Working but no refs.
 
-===== Chapter 3 – Offline Mode =====
+## Chapter 3 – Offline Mode ##
 
 Offline mode Enabled
 
@@ -144,7 +138,7 @@ Possible problems known:
   * There are not support for IE/Explorer - SiteKiosk for the Screens runs Explorer.
   * If its only currently used data, then what about sections of the app, that the user didnt visit or is not looking at? Solution: Fetching the whole state of the server initially as individual model observables and storing this on a client sided database (using NgRx for example) solvest his problem.
 
-===== Chapter 4 – Costs =====
+## Chapter 4 – Costs ##
 
 Documentation: [[https://firebase.google.com/pricing/|https://firebase.google.com/pricing/]] [[https://firebase.google.com/docs/firestore/pricing|https://firebase.google.com/docs/firestore/pricing]]
 
@@ -166,7 +160,7 @@ Documentation: [[https://firebase.google.com/pricing/|https://firebase.google.co
   * What about prices for development purposes? It seems prices are example 10 tests per day or 1 hours of tests per device priced? Do we need to pay for development, which can easily be expensive if errors are made. Solution: This will be restricted trough server rules and maybe Cloud Functions.
   * Firestore mentions exstra fees charged when using Cloud Firestore Security Rules per request: [[https://firebase.google.com/docs/firestore/pricing|https://firebase.google.com/docs/firestore/pricing]] which is a little bit hard to understand
 
-===== Links =====
+## Links ##
 
   * AngularFireBase: [[https://angularfirebase.com/lessons/|https://angularfirebase.com/lessons/]]
   * AngularFire2: [[https://github.com/angular/angularfire2|https://github.com/angular/angularfire2]]
