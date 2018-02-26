@@ -2,7 +2,8 @@
   <div class="row">
     <div class="col-12">
 
-      <ngb-alert *ngIf="alertMessage"
+      <ngb-alert class="alert-wrapper"
+        *ngIf="alertMessage"
         [type]="alertMessage.type"
         (close)="alertMessage = null">{{ alertMessage.message }}
       </ngb-alert>

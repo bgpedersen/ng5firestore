@@ -11,37 +11,31 @@ import { DataService } from '../core/services/data.service';
 export class UsersComponent implements OnInit, OnDestroy {
 
   refSubs = {
-    'databaseSub': null as Subscription
+    'usersSub': null as Subscription
   };
   editItem: User;
-  users: User[];
+  users: User[] = [];
 
   constructor(private dataService: DataService) { }
 
   ngOnInit() {
-    // Init get all items
-    this.getItems();
+    console.log('UsersComponent loaded');
 
-    this.refSubs.databaseSub = this.dataService.databaseUpdate$.subscribe(res => {
-      console.log('UsersComponent: database updated! this.dataService.database: ', this.dataService.database);
-      this.getItems();
-    });
+    this.refSubs.usersSub = this.dataService.database.Users$
+      .subscribe(res => {
+        console.log('UsersComponent: New Users: res: ', res);
+        this.users = this.convertItems(res);
+      });
   }
 
   ngOnDestroy() {
     this.clearRefSubs();
   }
 
-
-  getItems() {
-    this.users = this.convertItems(this.dataService.database.Users);
-    console.log('UsersComponent: getItems: this.dataService.database: ', this.dataService.database);
-    console.log('UsersComponent: getItems: this.users: ', this.users);
-  }
-
   // Convert items are unique convertions of the items for this component
   convertItems(items) {
     for (let i = 0; i < items.length; i++) {
+
     }
     return items;
   }

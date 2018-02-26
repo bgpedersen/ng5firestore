@@ -17,194 +17,171 @@ import { AuthService } from './auth.service';
 @Injectable()
 export class DataService {
 
+  serverRefs = {
+    'ActivityRef': this.db.collection<Activity>('activities'),
+    'UserRef': this.db.collection<User>('users')
+  }
+
   public database: DatabaseInterface = {
-    'User': {} as User,
-    'Activities': [] as Activity[],
-    'Users': [] as User[],
-    'ServerRefs': {
-      'ActivityRef': this.db.collection<Activity>('activities'),
-      'UserRef': this.db.collection<User>('users')
-    },
-    'ServerSubs': {}
+    'User$': this.authService.getUser(),
+    'Activities$': this.fetchActivities(),
+    'Users$': this.fetchUsers()
   };
-
-  // GIT SSH Change
-
-  public databaseUpdate$ = new Subject<any>();
-  // private database$ = new BehaviorSubject<DatabaseInterface>(this.database);
-
-  // refSubs = {
-  // 'activitySub': null as Subscription,
-  // 'bookingSub': null as Subscription
-  // };
 
   constructor(public db: AngularFirestore,
     private angularFireAuth: AngularFireAuth,
     private authService: AuthService) {
-    this.authService.user
-      .subscribe(user => {
-        if (user) {
-          this.database.User = user;
-          console.log('DataService: this.database.User: ', this.database.User);
-          // this.initServerSubs();
-        } else {
-          this.clearServerSubs();
-        }
-      });
-
-    this.fetchActivities();
-    this.fetchUsers();
   }
 
-  // Client Database
-  // databaseUpdate(event: { type: string, payload?: any }) {
-  //   console.log('DataService: databaseUpdate: event: ', event);
-  //   if (event.type === 'Clear') {
-  //     this.database = {
-  //       'Activities': [],
-  //       'Bookings': [],
-  //       'User': {} as firebase.User
-  //     };
-  //   }
-  //   if (event.type === 'Activities') {
-  //     this.database.Activities = event.payload;
-  //   }
-  //   if (event.type === 'Bookings') {
-  //     this.database.Bookings = event.payload;
-  //   }
-  //   if (event.type === 'User') {
-  //     this.database.User = event.payload;
-  //   }
-  //   // Emit database
-  //   console.log('DataService: databaseUpdate: this.database: ', this.database);
-  //   this.database$.next(this.database);
-  // }
-
-  // databaseObservable(): Observable<any> {
-  //   return this.database$.asObservable();
-  // }
-
-  // clearDatabase() {
-  //   this.databaseUpdate({ type: 'Clear' });
-  //   console.log('DataService: clearDatabase: this.database: ', this.database);
-  // }
-
-
-
-  clearServerSubs() {
-    for (const key in this.database.ServerSubs) {
-      if (this.database.ServerSubs[key]) {
-        this.database.ServerSubs[key].unsubscribe();
-      }
-    }
-    console.log('DataService: clearServerSubs: this.database: ', this.database);
-  }
-
-  // initServerSubs() {
-  //   this.fetchActivities();
-  //   this.fetchUsers();
-  // }
-
-  // Connections
   fetchActivities() {
-    // this.refSubs.activitySub = this.db.collection('activities')
-    this.database.ServerSubs.Activities$ = this.database.ServerRefs.ActivityRef
+    return this.serverRefs.ActivityRef
       .snapshotChanges()
       .map(arr => {
         return arr.map(snap => {
-          // console.log('dataService: fetchActivities: subscribe: snap: ', snap);
-          const obj = snap.payload.doc.data();
+          console.log('dataService: fetchActivities: map snap: ', snap);
+          const obj = snap.payload.doc.data() as Activity;
           obj.id = snap.payload.doc.id;
-          return new Activity(obj);
+          return obj;
         });
-      }).subscribe(res => {
-        this.database.Activities = res;
-        this.databaseUpdate$.next();
-        console.log('dataService: fetchActivities: this.database.Activities: ', this.database.Activities);
-      });
+      })
   }
 
-  // Connections
   fetchUsers() {
-    console.log('DataService: fetchUsers called');
-    this.database.ServerSubs.Users$ = this.database.ServerRefs.UserRef
+    return this.serverRefs.UserRef
       .snapshotChanges()
       .map(arr => {
         return arr.map(snap => {
+          console.log('dataService: fetchUsers: map snap: ', snap);
           const obj = snap.payload.doc.data() as User;
           return obj;
         });
-      }).subscribe(res => {
-        this.database.Users = res;
-        this.databaseUpdate$.next();
-        console.log('dataService: fetchUsers: this.database.Users: ', this.database.Users);
-      });
+      })
+  }
+
+  updateOne(options: { item: any, ref: AngularFirestoreCollection<any> }) {
+    const promise = new Promise((resolve, reject) => {
+
+      if (options.item) {
+        // Convert object to pure javascript
+        const item = Object.assign({}, options.item);
+        console.log('dataService: updateOne: update item: ', item);
+        options.ref.doc(item.id)
+          .update(item)
+          .then(() => {
+            console.log('dataService: updateOne success');
+            resolve();
+          }).catch(err => {
+            console.error('dataService: updateOne: error: ', err);
+            reject(err);
+          });
+      } else {
+        console.log('dataService: updateOne: wrong options! options: ', options);
+        reject();
+      }
+
+    })
+
+    return promise;
   }
 
   createOne(options: { item: any, ref: AngularFirestoreCollection<any> }) {
+    const promise = new Promise((resolve, reject) => {
 
-    if (options.item) {
-      options.ref.add(Object.assign({}, options.item))
-        .then(() => {
-          console.log('dataService: createOne: forkJoin done');
-        }).catch(err => {
-          console.error('dataService: createOne: error: ', err);
+      if (options.item) {
+        // Convert object to pure javascript
+        const item = Object.assign({}, options.item);
+        console.log('dataService: createOne: set item: ', item);
+        options.ref.add(item)
+          .then(() => {
+            console.log('dataService: createOne success');
+            resolve();
+          }).catch(err => {
+            console.error('dataService: createOne: error: ', err);
+            reject(err);
+          });
+      } else {
+        console.log('dataService: createOne: wrong options! options: ', options);
+        reject();
+      }
+
+    })
+
+    return promise;
+  }
+
+  deleteOne(options: { item: any, ref: AngularFirestoreCollection<any> }) {
+    const promise = new Promise((resolve, reject) => {
+
+      if (options.item) {
+        // Convert object to pure javascript
+        const item = Object.assign({}, options.item);
+        console.log('dataService: deleteOne: update item: ', item);
+        options.ref.doc(item.id)
+          .delete()
+          .then(() => {
+            console.log('dataService: deleteOne success');
+            resolve();
+          }).catch(err => {
+            console.error('dataService: deleteOne: error: ', err);
+            reject(err);
+          });
+      } else {
+        console.log('dataService: deleteOne: wrong options! options: ', options);
+        reject();
+      }
+
+    })
+
+    return promise;
+  }
+
+  createMany(options: { items: any[] }) {
+    const promise = new Promise((resolve, reject) => {
+
+      if (options.items && options.items.length) {
+        const promises = [];
+        for (let i = 0; i < options.items.length; i++) {
+          promises.push(this.createOne({ 'item': options.items[i].item, 'ref': options.items[i].ref }));
+        }
+        forkJoin(promises).subscribe(() => {
+          console.log('dataService: createMany: forkJoin done');
+          resolve();
+        }, (err) => {
+          console.error('dataService: createMany: error: ', err);
+          reject(err);
         });
-    } else {
-      console.log('dataService: createOne: wrong options! options: ', options);
-    }
-  }
-
-  createMany(options: { items: any[], ref: AngularFirestoreCollection<any> }) {
-    const promises = [];
-
-    if (options.items && options.items.length) {
-      for (let i = 0; i < options.items.length; i++) {
-        promises.push(options.ref.add(Object.assign({}, options.items[i])));
+      } else {
+        console.log('dataService: createMany: wrong options! options: ', options);
+        reject();
       }
-      forkJoin(promises).subscribe(() => {
-        console.log('dataService: createMany: forkJoin done');
-      }, (err) => {
-        console.error('dataService: createMany: error: ', err);
-      });
-    } else {
-      console.log('dataService: createMany: wrong options! options: ', options);
-    }
+
+    })
+
+    return promise;
   }
 
-  deleteAll(options: { items: any[], ref: AngularFirestoreCollection<any> }) {
-    const promises = [];
+  deleteMany(options: { items: any[] }) {
+    const promise = new Promise((resolve, reject) => {
 
-    if (options.items && options.items.length) {
-      for (let i = 0; i < options.items.length; i++) {
-        promises.push(options.ref.doc(options.items[i].id).delete());
+      if (options.items && options.items.length) {
+        const promises = [];
+        for (let i = 0; i < options.items.length; i++) {
+          promises.push(this.deleteOne({ 'item': options.items[i].item, 'ref': options.items[i].ref }));
+        }
+        forkJoin(promises).subscribe(() => {
+          console.log('dataService: deleteMany: forkJoin done');
+          resolve();
+        }, (err) => {
+          console.error('dataService: deleteMany: error: ', err);
+          reject(err);
+        });
+      } else {
+        console.log('dataService: deleteMany: wrong options! options: ', options);
+        reject();
       }
-      forkJoin(promises).subscribe(() => {
-        console.log('dataService: deleteAll: forkJoin done');
-      }, (err) => {
-        console.error('dataService: deleteAll: error: ', err);
-      });
-    } else {
-      console.log('dataService: deleteAll: wrong options! options: ', options);
-    }
+
+    })
+
+    return promise;
   }
-
-  // Connections
-  // fetchBookings() {
-  //   this.refSubs.bookingSub = this.db.collection('bookings')
-  //     .snapshotChanges()
-  //     .map(arr => {
-  //       return arr.map(snap => {
-  //         const obj = snap.payload.doc.data();
-  //         obj.id = snap.payload.doc.id;
-  //         return new Booking(obj);
-  //       });
-  //     })
-  //     .subscribe(response => {
-  //       console.log('dataService: fetchBookings: subscribe: response: ', response);
-  //       this.databaseUpdate({ type: 'Bookings', payload: response });
-  //     });
-  // }
-
-
 }

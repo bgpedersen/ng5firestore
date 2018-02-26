@@ -32,7 +32,7 @@
             class="list-group-item"
             [ngClass]="{'active': editItem && item.id === editItem.id}"
             (click)="getItem(item.id)">
-            <strong>ID: {{item.id}}</strong> <small>{{item.timestamp }}</small>
+            <strong>ID: {{item.id}}</strong> <small>{{item.template.listDate }}</small>
             <p>{{item.title}}<br> {{item.description}}
             </p>
           </li>
@@ -66,19 +66,19 @@
                 [(ngModel)]="editItem.description">
             </div>
 
-            <button (click)="updateItem()"
+            <button (click)="updateItem(editItem)"
               *ngIf="editItem.id"
               type="submit"
               class="btn btn-outline-success"
               [disabled]="!editItem.title">Update</button>
 
-            <button (click)="createOne()"
+            <button (click)="createOne(editItem)"
               *ngIf="!editItem.id"
               type="submit"
               class="btn btn-outline-success"
               [disabled]="!editItem.title">Create</button>
 
-            <button (click)="deleteItem()"
+            <button (click)="deleteItem(editItem)"
               *ngIf="editItem.id"
               class="btn btn-outline-danger">Delete</button>
 

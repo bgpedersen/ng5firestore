@@ -8,18 +8,19 @@ import { AngularFirestore, AngularFirestoreDocument } from 'angularfire2/firesto
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/switchMap';
 import { User } from '../interfaces/User';
+import { DataService } from './data.service';
 
 @Injectable()
 export class AuthService {
 
-  user: Observable<User>;
+  user$: Observable<User>;
 
   constructor(private angularFireAuth: AngularFireAuth,
     private angularFirestore: AngularFirestore,
     private router: Router) {
 
     // Get auth data, then get firestore user document || null
-    this.user = this.angularFireAuth.authState
+    this.user$ = this.angularFireAuth.authState
       .switchMap(user => {
         if (user) {
           return this.angularFirestore.doc<User>(`users/${user.uid}`).valueChanges();
@@ -27,6 +28,10 @@ export class AuthService {
           return Observable.of(null);
         }
       });
+  }
+
+  getUser() {
+    return this.user$;
   }
 
   updateUser(user) {

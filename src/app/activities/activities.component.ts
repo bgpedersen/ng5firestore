@@ -7,6 +7,7 @@ import { DatabaseInterface } from '../core/interfaces/Database';
 import { Subscription } from 'rxjs/Subscription';
 import { DataService } from '../core/services/data.service';
 import * as moment from 'moment';
+import { AlertService } from '../core/services/alert.service';
 
 @Component({
   selector: 'app-activities',
@@ -16,43 +17,35 @@ import * as moment from 'moment';
 export class ActivitiesComponent implements OnInit, OnDestroy {
 
   refSubs = {
-    'databaseSub': null as Subscription
+    'activitiesSub': null as Subscription
   };
 
   count = 10;
 
   editItem: Activity;
-  activities: Activity[];
+  activities: Activity[] = [];
 
-  constructor(private dataService: DataService) { }
+  constructor(private dataService: DataService, private alertService: AlertService) { }
 
   ngOnInit() {
     console.log('ActivitiesComponent loaded');
 
-    // Init get all items
-    this.getItems();
-
-    // Update new activities on database update
-    this.refSubs.databaseSub = this.dataService.databaseUpdate$.subscribe(res => {
-      console.log('ActivityComponent: database updated! this.dataService.database: ', this.dataService.database);
-      this.getItems();
-    });
+    this.refSubs.activitiesSub = this.dataService.database.Activities$
+      .subscribe(res => {
+        this.activities = this.convertItems(res);
+        console.log('ActivityComponent: this.activities: ', this.activities);
+      });
   }
 
   ngOnDestroy() {
     this.clearRefSubs();
   }
 
-  getItems() {
-    this.activities = this.convertItems(this.dataService.database.Activities);
-    console.log('ActivityComponent: getItems: this.activities: ', this.activities);
-  }
-
   // Convert items are unique convertions of the items for this component
   convertItems(items) {
     for (let i = 0; i < items.length; i++) {
       items[i].template = {
-        'listDate': moment(items[i].timestamp).format('HH:mm DDD MMM YYYY')
+        'listDate': moment(items[i].updatedAt).format('HH:mm - DD MMM YYYY')
       };
     }
     return items;
@@ -67,6 +60,12 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     console.log('ActivitiesComponent: clearRefSubs: this.refSubs: ', this.refSubs);
   }
 
+
+  newItem() {
+    this.editItem = new Activity();
+    console.log('newItem: editItem: ', this.editItem);
+  }
+
   getItem(id) {
     for (let i = 0; i < this.activities.length; i++) {
       if (this.activities[i].id === id) {
@@ -76,92 +75,101 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     }
   }
 
-  deleteAll() {
-    console.log('ActivitiesComponent: deleteAll: this.activities: ', this.activities);
-    this.dataService.deleteAll({ items: this.activities, ref: this.dataService.database.ServerRefs.ActivityRef });
-  }
-  // this.activitiesDoc = this.activitiesCollection.doc(id);
-  // this.activitiesDoc
-  //   .snapshotChanges()
-  //   .map(snap => {
-  //     if (snap.payload.exists) {
-  //       const obj = snap.payload.data() as Activity;
-  //       obj.id = snap.payload.id;
-
-  //       console.log('getItem: obj: ', obj);
-  //       const source = snap.payload.metadata.fromCache ? 'local cache' : 'server';
-  //       console.log('getItem: Data came from ' + source);
-
-  //       return obj;
-  //     }
-  //   })
-  //   .subscribe(response => {
-  //     this.editItem = response ? response : null;
-  //     console.log('getItem: this.editItem: ', this.editItem);
-  //   });
-
-  updateItem() {
-    // this.activitiesDoc = this.db.doc('activities/' + this.editItem.id);
-    // this.activitiesDoc.update({
-    //   title: this.editItem.title,
-    //   description: this.editItem.description,
-    //   timestamp: new Date()
-    // })
-    //   .then(() => {
-
-    //   })
-    //   .catch(err => console.error('error: ', err.message));
+  updateItem(editItem) {
+    const options = {
+      item: new Activity(editItem),
+      ref: this.dataService.serverRefs.ActivityRef
+    }
+    this.dataService.updateOne(options).then(() => {
+      console.log('ActivitiesComponent: updateItem: success');
+      this.alertService.createAlert({ 'type': 'success', 'message': 'Item updated' });
+    }).catch(err => {
+      console.log('ActivitiesComponent: updateItem: error: ', err);
+      this.alertService.createAlert({ 'type': 'danger', 'message': 'Item update error! ' + err });
+    });
   }
 
-
-  createItem() {
-    // this.activitiesCollection.add(this.editItem)
-    //   .then(res => {
-    //     console.log('createItem: res:', res);
-    //     this.getItem(res.id);
-    //   })
-    //   .catch(err => console.error('error: ', err.message));
+  createItem(editItem) {
+    const options = {
+      item: new Activity(editItem),
+      ref: this.dataService.serverRefs.ActivityRef
+    }
+    this.dataService.createOne(options).then(() => {
+      console.log('ActivitiesComponent: createItem: success');
+      this.alertService.createAlert({ 'type': 'success', 'message': 'Item created' });
+    }).catch(err => {
+      console.log('ActivitiesComponent: createItem: error: ', err);
+      this.alertService.createAlert({ 'type': 'danger', 'message': 'Item create error! ' + err });
+    });
   }
 
-
-  deleteItem() {
-    // this.activitiesDoc = this.db.doc('activities/' + this.editItem.id);
-    // this.activitiesDoc.delete()
-    //   .then(res => {
-    //     this.clearItem();
-    //   })
-    //   .catch(err => console.error('error: ', err.message));
-  }
-
-  clearItem() {
-    this.editItem = null;
-  }
-
-  newItem() {
-    this.editItem = new Activity();
-    console.log('newItem: editItem: ', this.editItem);
-  }
-
-  createOne() {
-    console.log('ActivitiesComponent: createOne: this.editItem: ', this.editItem);
-    this.dataService.createOne({ item: this.editItem, ref: this.dataService.database.ServerRefs.ActivityRef });
-    this.clearItem();
+  deleteItem(editItem) {
+    const options = {
+      item: new Activity(editItem),
+      ref: this.dataService.serverRefs.ActivityRef
+    }
+    this.dataService.deleteOne(options).then(() => {
+      console.log('ActivitiesComponent: deleteItem: success');
+      this.alertService.createAlert({ 'type': 'success', 'message': 'Item deleted' });
+      this.clearItem();
+    }).catch(err => {
+      console.log('ActivitiesComponent: deleteItem: error: ', err);
+      this.alertService.createAlert({ 'type': 'danger', 'message': 'Item delete error! ' + err });
+    });
   }
 
   createMany(count) {
     const items = [];
 
     for (let i = 0; i < count; i++) {
-      const obj = new Activity({
+      const obj = {
         title: 'Auto title #' + i,
         description: 'Auto description #' + i,
-      });
-      items.push(obj);
+      };
+      const options = {
+        item: new Activity(obj),
+        ref: this.dataService.serverRefs.ActivityRef
+      }
+      items.push(options);
     }
 
-    console.log('ActivitiesComponent: createMany: items: ', items);
-    this.dataService.createMany({ items: items, ref: this.dataService.database.ServerRefs.ActivityRef });
+    this.dataService.createMany({ 'items': items })
+      .then(() => {
+        console.log('ActivitiesComponent: createMany: success');
+        this.alertService.createAlert({ 'type': 'success', 'message': 'Items created' });
+      }, (err) => {
+        console.log('ActivitiesComponent: createMany: error: ', err);
+        this.alertService.createAlert({ 'type': 'danger', 'message': 'Items created error! ' + err });
+      })
   }
+
+  deleteAll() {
+    const items = [];
+
+    for (let i = 0; i < this.activities.length; i++) {
+      const options = {
+        item: new Activity(this.activities[i]),
+        ref: this.dataService.serverRefs.ActivityRef
+      }
+      items.push(options);
+    }
+
+    this.dataService.deleteMany({ 'items': items })
+      .then(() => {
+        console.log('ActivitiesComponent: deleteMany: success');
+        this.alertService.createAlert({ 'type': 'success', 'message': 'Items deleted' });
+        this.clearItem();
+      }, (err) => {
+        console.log('ActivitiesComponent: deleteMany: error: ', err);
+        this.alertService.createAlert({ 'type': 'danger', 'message': 'Items deleted error! ' + err });
+      })
+  }
+
+  clearItem() {
+    this.editItem = null;
+  }
+
+
 
 
 }

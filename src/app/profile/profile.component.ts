@@ -17,7 +17,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('ProfileComponent loaded');
-    this.userSub = this.authService.user
+    this.userSub = this.authService.getUser()
       .subscribe(user => {
         this.editItem = user;
         console.log('ProfileComponent: this.editItem: ', this.editItem);

@@ -7,12 +7,7 @@ import { User } from './User';
 
 
 export interface DatabaseInterface {
-  'User': User,
-  'Activities': Activity[];
-  'Users': User[];
-  'ServerRefs': {
-    'ActivityRef': AngularFirestoreCollection<Activity>
-    'UserRef': AngularFirestoreCollection<User>
-  };
-  'ServerSubs': any;
+  'User$': Observable<User>,
+  'Activities$': Observable<Activity[]>;
+  'Users$': Observable<User[]>;
 }

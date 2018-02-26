@@ -1,13 +1,14 @@
 import * as firebase from 'firebase';
+import * as moment from 'moment';
 
 export interface ActivityInterface {
   'id'?: string;
   'title'?: string;
   'description'?: string;
-  'timestamp'?: any;
+  // 'timestamp'?: any;
   'createdAt'?: any;
-  'updatedAt'?: any;
-  'template'?: any;
+  // 'updatedAt'?: any;
+  // 'template'?: any;
 }
 
 export class Activity implements ActivityInterface {
@@ -19,13 +20,19 @@ export class Activity implements ActivityInterface {
   'updatedAt': any;
   'template'?: any;
   constructor(data: ActivityInterface = {}) {
+    // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
     if (data && data.id) {
       this.id = data.id;
     }
     this.title = data.title ? data.title : '';
     this.description = data.description ? data.description : '';
-    this.timestamp = data.timestamp ? data.timestamp : firebase.database.ServerValue.TIMESTAMP;
-    this.createdAt = this.timestamp = data.timestamp ? data.timestamp : firebase.firestore.FieldValue.serverTimestamp();
-    this.updatedAt = this.timestamp = data.timestamp ? data.timestamp : firebase.database.ServerValue.TIMESTAMP;
+
+    // this.timestamp = timestamp;
+    // this.createdAt = data.createdAt ? data.createdAt : timestamp;
+    // this.updatedAt = timestamp;
+    this.timestamp = new Date();
+    this.createdAt = data.createdAt ? data.createdAt : new Date();
+    this.updatedAt = new Date();
   }
 }
