@@ -51,6 +51,7 @@
       * Font-Awesome
       * Moment
       * Lodash
+      * ** Angular Material ??? https://material.angular.io/guide/getting-started
   * **Version Stamp?? tutorial [[https://medium.com/@amcdnl/version-stamping-your-app-with-the-angular-cli-d563284bb94d|https://medium.com/@amcdnl/version-stamping-your-app-with-the-angular-cli-d563284bb94d]]**
   * Production build and Firebase Deploy
       * [[https://angular-5-firestore-cloud.firebaseapp.com/|https://angular-5-firestore-cloud.firebaseapp.com/]]

@@ -100,6 +100,8 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     this.dataService.createOne(options).then(() => {
       console.log('ActivitiesComponent: createItem: success');
       this.alertService.createAlert({ 'type': 'success', 'message': 'Item created' });
+      // TODO Get created ID to select it after created
+      // this.getItem()
     }).catch(err => {
       console.log('ActivitiesComponent: createItem: error: ', err);
       this.alertService.createAlert({ 'type': 'danger', 'message': 'Item create error! ' + err });
