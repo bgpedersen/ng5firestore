@@ -1,73 +1,63 @@
 # Angular 5 Project with Firebase Cloud Firestore (Ng5firestore)
 
+## Chapter 1: Overview of project
+
   * Angular 5 built with Angular CLI
   * Project setup in Firebase using Firestore Cloud database
   * AngularFire2 library integrated in app to use Firebase
   * Angular 5 Modular structure following best practice pattern: Core module injected in App module, which provides shared features like auth, guard, interfaces, data-service, logging etc.
-  * Authentication and Users - Chapter 1.1
-  * Firestore Cloud Database relations & centralized client database – Chapter 2
-  * Offline mode enabled – Chapter 3
+  * Offline mode enabled
+      * Enabling AngularFirestoreModule.enablePersistence will make offline mode possible, so current used data is cached, and any actions are stored and sent when back online.
+      * Possible problem: There are not support for IE/Explorer - SiteKiosk for the Screens runs Explorer.
+      * Possible problem: If its only currently used data, then what about sections of the app, that the user didnt visit or is not looking at? Solution: Fetching the whole state of the server initially as individual model observables and storing this on a client sided database (using NgRx for example) solvest his problem.
   * Routing Module
       * Protected routes using Guard
-      * Guard using the Observable Firebase User from the Authentication service
+      * Guard using the observable user from the Authentication service
   * Interfaces/Classes/Models
+      * Database
+        * Responsible for maintaining the subscribeable observable relations with mapped id's etc.
       * **Activity (needs more TypeScript/ES research to extend for view models etc.)**
-      * **Booking (needs more TypeScript/ES research to extend for view models etc.)**
-      * **Database (needs more TypeScript/ES research to extend for view models etc.)**
+        * Using server time with firebase.firestore.FieldValue.serverTimestamp() is not fast + makes double reads because time is set after updating hence new changes.
+      * Group
+      * User
       * AlertMessage
   * Services
       * Alert Message service using Observable and interface and NG-Bootstrap alert component
       * Authentication Service using AngularFireAuth and Firebase User
-        * **Authentication Users relation til Database users ???**
-        * **Authentication Users and Database User Roles ???**
-        * Log in (anonymously, google, email/password)
-        * Log out
-        * Sign up w. email/password
-        * Firebase user subscription handler for calling data service to:
-          * Insert User object in database and creating reference subscriptions.
-          * Unsubscribing references, clearing database and navigate to login
-        * Observable Firebase User authentication state observable for guarded routes
-        * Showing User details using the User Object
+        * Guide: [[https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/|https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/]]
+        * Created an Auth service to inject in the Core module, that will facilitate sign-in, user session, save custom user data etc.
+        * Authentication User relation til Database user via UID (+ get user observable function)
+        * Log in / logout (Google)
+        * Update user details
+        * **User Roles ???**
+        * **Create User (currently creating user if not already existing with UID) ???**
       * Data service
-        * Declaring database and database observable
-        * Database action handler
-        * Subscribing and unsubscribing server references
-        * Fetching and converting all server data
-        * Using interfaces and classes to create entitites
-        * **Firebase datastructure to include relations**
-        * **Using firebase relations in dataservice**
-        * **Using NgRx to handle client database actions ???**
+        * Server references object (containing all references to be maintained one place)
+        * Database
+          * Always in sync with server database
+          * Contains all subscribable observables to be used in components
+        * Declares all relations as functions called in the database
+        * Handles all server CRUD's just using item(s) and the server relation
+        * **Firebase data structure to include relations - see chapter 2**
+        * **Using firebase relations in dataservice - see chapter 2**
+        * **Using NgRx to handle client database actions - see chapter 2**
   * Components
-      * Bookings
-      * Activities
-  * Firebase Costs - Chapter 4
+      * Activities (+CRUD + multi create/delete)
+      * Users
+      * Profile
   * 3rd Party libraries via NPM
       * NG-Bootstrap
       * Bootstrap 4
       * Font-Awesome
       * Moment
+      * Lodash
   * **Version Stamp?? tutorial [[https://medium.com/@amcdnl/version-stamping-your-app-with-the-angular-cli-d563284bb94d|https://medium.com/@amcdnl/version-stamping-your-app-with-the-angular-cli-d563284bb94d]]**
   * Production build and Firebase Deploy
       * [[https://angular-5-firestore-cloud.firebaseapp.com/|https://angular-5-firestore-cloud.firebaseapp.com/]]
+  * Firebase Costs - Chapter 4
 
 
-## Chaper 1.1: Authentication and Users ##
-
-Followed guide: [[https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/|https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/]]
-
-Created an Auth service to inject in the Core module, that will facilitate sign-in, user session, save custom user data etc.
-
-Write about guard, interface,
-
-Next step 5
-
-## Chapter 2: Firebase Relations and centralized database ##
-
-**Firebase datastructure to include relations ??? **
-
-**Using firebase relations in dataservice ???**
-
-**Using NgRx to handle client database actions ???**
+## Chapter 2: Firebase Relations and NgRx (statemanagement for client sided centralized database) ##
 
 Example code created by me
 
@@ -127,39 +117,6 @@ Old deleted examples with relations concept or no relations at all
   * Example #4: Youtube guide: [[https://www.youtube.com/watch?v=-GjF9pSeFTs&t=8s|https://www.youtube.com/watch?v=-GjF9pSeFTs&t=8s]] getting snapshot data of activities. Creating object with the data and id following an interface, subscribing and saving the static response in a list. Working but no refs.
   * Example #5: Created CRUD with Activities. Working but no refs.
 
-## Chapter 3 – Offline Mode ##
-
-Offline mode Enabled
-
-Enabling AngularFirestoreModule.enablePersistence will make offline mode possible, so current used data is cached, and any actions are stored and sent when back online.
-
-Possible problems known:
-
-  * There are not support for IE/Explorer - SiteKiosk for the Screens runs Explorer.
-  * If its only currently used data, then what about sections of the app, that the user didnt visit or is not looking at? Solution: Fetching the whole state of the server initially as individual model observables and storing this on a client sided database (using NgRx for example) solvest his problem.
-
-## Chapter 4 – Costs ##
-
-Documentation: [[https://firebase.google.com/pricing/|https://firebase.google.com/pricing/]] [[https://firebase.google.com/docs/firestore/pricing|https://firebase.google.com/docs/firestore/pricing]]
-
-  * Costs are per document read/write/delete based storage cost bandwidth.
-  * Solution: Using the idea for fetching all relevant data initially, store it in a client database and use the client to match the references through keys, fixes the multiplying duplication reading of relations and the otherwise huge costs.
-  * Old Data Relation issue: Fetching example from IBG Manager on Stage required for clicking Activity tab and click 1 activity (NOTE: Special api for fetching Activity List, so this will be estimated example based on Stage Kapselfabrikken 1):
-      * BASE DOCUMENT READS 14830
-      * 3 Departments
-      * 72 (36 Residents * 2 because 1 each ProfilePics)
-      * 52 (26 Employees * 2 because each ProfilePics)
-      * 60 (20 GroupConnections * 3 because 1 each Group and 1 each group has Institution)
-      * 20 (10 ActivityClubs * 2 because of Resources)
-      * 160 (80 Pictograms * 2 because of Resources)
-      * 3 External Departments
-      * 14.460 (723 Activities * 20 (3 Departments 1 ActivityClub 5 SignupEmployees 5 SignupResidents 5 Resources 1 CoverImages ))
-      * CLICKING 1 ACTIVITY DOCUMENT READS: 66
-      * (1 Activity 3 Departments 1 ActivityClubs 1 CoverImages 5 Resources 10 (5 * 2 ResponsibleEmployees) 10 (5 * 2 ResponsibleResidents) 10 (5 * 2 SignupEmployees) 2 (1 * 2 ResponsibleResidents) 8 (4 * 2 Pictograms) 4 (2 * 2 Groups) 5 GroupPosts 5 (1 * 5 Repeats w. GroupPosts) 1 NotificationSettingActivities)
-      * TOTAL DOCUMENTS READ WOULD BE 14896, DOING THIS 6 TIMES WOULD READ 100K = 0.18$.
-  * What about prices for development purposes? It seems prices are example 10 tests per day or 1 hours of tests per device priced? Do we need to pay for development, which can easily be expensive if errors are made. Solution: This will be restricted trough server rules and maybe Cloud Functions.
-  * Firestore mentions exstra fees charged when using Cloud Firestore Security Rules per request: [[https://firebase.google.com/docs/firestore/pricing|https://firebase.google.com/docs/firestore/pricing]] which is a little bit hard to understand
-
 ## Links ##
 
   * AngularFireBase: [[https://angularfirebase.com/lessons/|https://angularfirebase.com/lessons/]]
@@ -171,9 +128,6 @@ Documentation: [[https://firebase.google.com/pricing/|https://firebase.google.co
   * NgRx: [[https://github.com/ngrx/platform|https://github.com/ngrx/platform]]
   * NgRx: [[https://angularfirebase.com/lessons/firebase-with-angular-ngrx-redux/|https://angularfirebase.com/lessons/firebase-with-angular-ngrx-redux/]]
   * Angular Structure: [[https://medium.com/@motcowley/angular-folder-structure-d1809be95542|https://medium.com/@motcowley/angular-folder-structure-d1809be95542]]
-
-
-
 
 ## Ng5firestore
 
