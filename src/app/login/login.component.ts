@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { AuthService } from '../core/services/auth.service';
+import { DataService } from '../core/services/data.service';
 
 @Component({
   selector: 'app-login',
@@ -13,12 +14,13 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   userSub: Subscription;
 
-  constructor(private authService: AuthService,
+  constructor(private dataService: DataService,
+    private authService: AuthService,
     private router: Router) { }
 
   ngOnInit() {
     // If already logged in, go to booking instead of showing login page
-    this.userSub = this.authService.getUser()
+    this.userSub = this.dataService.database.User$
       .map(user => !!user)
       .subscribe(loggedIn => {
         if (loggedIn) {
@@ -31,10 +33,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.userSub.unsubscribe();
   }
-
-  // login(options) {
-  //   this.authService.googleLogin(options);
-  // }
 
   googleLogin() {
     this.authService.googleLogin();

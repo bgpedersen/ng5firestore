@@ -4,7 +4,6 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
-import { Booking } from '../interfaces/Booking';
 import { DatabaseInterface } from '../interfaces/Database';
 import * as firebase from 'firebase/app';
 import { AngularFireAuth } from 'angularfire2/auth';

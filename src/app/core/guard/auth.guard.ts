@@ -25,26 +25,3 @@ export class AuthGuard implements CanActivate {
       });
   }
 }
-
-
-
-//   // add the service we need
-//   constructor(
-//     private authService: AuthService,
-//     private router: Router,
-//     private dataService: DataService
-//   ) { }
-
-//   canActivate(
-//     next: ActivatedRouteSnapshot,
-//     state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-
-//     return this.dataService.database.User$
-//       .map(user => {
-//         console.log('AuthGuard: user: ', user);
-//         if (user) {
-//           return true;
-//         }
-//         return false;
-//       });
-//   }

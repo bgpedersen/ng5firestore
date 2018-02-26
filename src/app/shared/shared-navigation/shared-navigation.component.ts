@@ -12,7 +12,6 @@ import { DataService } from '../../core/services/data.service';
 export class SharedNavigationComponent implements OnInit, OnDestroy {
 
   refSubs = {
-    // 'databaseSub': null as Subscription
     'userSub': null as Subscription
   };
   user: User;
@@ -22,28 +21,16 @@ export class SharedNavigationComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('SharedNavigationComponent loaded');
 
-    this.refSubs.userSub = this.dataService.database.User$.subscribe(user => {
-      this.user = user;
-      console.log('SharedNavigationComponent: this.user: ', this.user);
-    })
-    // Init get all items
-    // this.getItems();
-
-    // this.refSubs.databaseSub = this.dataService.databaseUpdate$.subscribe(res => {
-    //   console.log('SharedNavigationComponent: database updated! this.dataService.database: ', this.dataService.database);
-    //   this.getItems();
-    // });
+    this.refSubs.userSub = this.dataService.database.User$
+      .subscribe(user => {
+        this.user = user;
+        console.log('SharedNavigationComponent: this.user: ', this.user);
+      })
   }
 
   ngOnDestroy() {
     this.clearRefSubs();
   }
-
-  // getItems() {
-  //   this.user = this.dataService.database.User;
-  //   console.log('SharedNavigationComponent: getItems: this.user: ', this.user);
-  // }
-
 
   clearRefSubs() {
     for (const key in this.refSubs) {

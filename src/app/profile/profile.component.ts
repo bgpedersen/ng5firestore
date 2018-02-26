@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { User } from '../core/interfaces/User';
 import { AuthService } from '../core/services/auth.service';
+import { DataService } from '../core/services/data.service';
 
 @Component({
   selector: 'app-profile',
@@ -13,11 +14,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   userSub: Subscription;
   editItem: User;
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private dataService: DataService) { }
 
   ngOnInit() {
     console.log('ProfileComponent loaded');
-    this.userSub = this.authService.getUser()
+    this.userSub = this.dataService.database.User$
       .subscribe(user => {
         this.editItem = user;
         console.log('ProfileComponent: this.editItem: ', this.editItem);

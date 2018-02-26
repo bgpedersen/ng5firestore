@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { DataService } from '../core/services/data.service';
 import * as moment from 'moment';
 import { AlertService } from '../core/services/alert.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-activities',
@@ -48,6 +49,8 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
         'listDate': moment(items[i].updatedAt).format('HH:mm - DD MMM YYYY')
       };
     }
+    items = _.orderBy(items, 'updatedAt', 'desc');
+
     return items;
   }
 
