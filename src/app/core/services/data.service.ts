@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
-import { DatabaseInterface } from '../interfaces/Database';
+import { ObservableDatabase, Database } from '../interfaces/Database';
 import * as firebase from 'firebase/app';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Subscription } from 'rxjs/Subscription';
@@ -21,32 +21,63 @@ export class DataService {
     'UserRef': this.db.collection<User>('users')
   }
 
-  public database: DatabaseInterface = {
-    'User$': this.authService.getUser(),
-    'Activities$': this.fetchActivities(),
-    'Users$': this.fetchUsers()
+  // Non-readable database to keep the actual data to be exposed as observables
+  private database: Database = {
+    '_User': new BehaviorSubject(null),
+    '_Users': new BehaviorSubject([]),
+    '_Activities': new BehaviorSubject([])
   };
+
+  // Readable database that exposes the data as observables
+  public readonly observableDatabase: ObservableDatabase = {
+    'User$': this.database._User.asObservable(),
+    'Users$': this.database._Users.asObservable(),
+    'Activities$': this.database._Activities.asObservable()
+  }
 
   constructor(public db: AngularFirestore,
     private angularFireAuth: AngularFireAuth,
     private authService: AuthService) {
+    this.initDatabase();
+  }
+
+  // Keeps user up to date and only subscribes to server data when logged in
+  initDatabase() {
+    this.authService.user$
+      .subscribe(user => {
+        console.log('dataService: initDatabase: user: ', user);
+        if (user) {
+          // Logged in - update user and subscribe
+          this.database._User.next(user);
+          this.fetchActivities();
+          this.fetchUsers();
+        } else {
+          // Kill subscribes ?
+        }
+      })
   }
 
   fetchActivities() {
-    return this.serverRefs.ActivityRef
+    this.serverRefs.ActivityRef
       .snapshotChanges()
       .map(arr => {
         return arr.map(snap => {
           console.log('dataService: fetchActivities: map snap: ', snap);
+          const fromCache = snap.payload.doc.metadata.fromCache;
+          console.log('dataService: fetchActivities: map fromCache: ', fromCache);
           const obj = snap.payload.doc.data() as Activity;
           obj.id = snap.payload.doc.id;
           return obj;
         });
       })
+      .subscribe(res => {
+        console.log('dataService: fetchActivities: res: ', res);
+        this.database._Activities.next(res);
+      });
   }
 
   fetchUsers() {
-    return this.serverRefs.UserRef
+    this.serverRefs.UserRef
       .snapshotChanges()
       .map(arr => {
         return arr.map(snap => {
@@ -55,14 +86,63 @@ export class DataService {
           return obj;
         });
       })
+      .subscribe(res => {
+        console.log('dataService: fetchUsers: res: ', res);
+        this.database._Users.next(res);
+      });
+  }
+
+  // fetchActivities() {
+  //   return this.serverRefs.ActivityRef
+  //     .snapshotChanges()
+  //     .map(arr => {
+  //       return arr.map(snap => {
+  //         console.log('dataService: fetchActivities: map snap: ', snap);
+  //         const obj = snap.payload.doc.data() as Activity;
+  //         obj.id = snap.payload.doc.id;
+  //         return obj;
+  //       });
+  //     })
+  // }
+
+  // fetchUsers() {
+  //   return this.serverRefs.UserRef
+  //     .snapshotChanges()
+  //     .map(arr => {
+  //       return arr.map(snap => {
+  //         console.log('dataService: fetchUsers: map snap: ', snap);
+  //         const obj = snap.payload.doc.data() as User;
+  //         return obj;
+  //       });
+  //     })
+  // }
+
+  addDataDetails(item, action) {
+    // Adding fieldValue will make double read updates because time is added with a delay server-side !!!
+    // item.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+    if (action === 'created') {
+      item.createdBy = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+      item.createdAt = new Date();
+    }
+    if (action === 'modified') {
+      item.updatedBy = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+      item.updatedAt = new Date();
+    }
+
+    return item;
   }
 
   updateOne(options: { item: any, ref: AngularFirestoreCollection<any> }) {
     const promise = new Promise((resolve, reject) => {
 
       if (options.item) {
+        // Add data details
+        options.item = this.addDataDetails(options.item, 'modified');
+
         // Convert object to pure javascript
         const item = Object.assign({}, options.item);
+
         console.log('dataService: updateOne: update item: ', item);
         options.ref.doc(item.id)
           .update(item)
@@ -87,6 +167,9 @@ export class DataService {
     const promise = new Promise((resolve, reject) => {
 
       if (options.item) {
+        // Add data details
+        options.item = this.addDataDetails(options.item, 'created');
+
         // Convert object to pure javascript
         const item = Object.assign({}, options.item);
         console.log('dataService: createOne: set item: ', item);

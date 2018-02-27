@@ -21,7 +21,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('UsersComponent loaded');
 
-    this.refSubs.usersSub = this.dataService.database.Users$
+    this.refSubs.usersSub = this.dataService.observableDatabase.Users$
       .subscribe(res => {
         console.log('UsersComponent: New Users: res: ', res);
         this.users = this.convertItems(res);

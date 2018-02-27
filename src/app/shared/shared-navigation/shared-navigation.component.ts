@@ -21,7 +21,7 @@ export class SharedNavigationComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('SharedNavigationComponent loaded');
 
-    this.refSubs.userSub = this.dataService.database.User$
+    this.refSubs.userSub = this.dataService.observableDatabase.User$
       .subscribe(user => {
         this.user = user;
         console.log('SharedNavigationComponent: this.user: ', this.user);

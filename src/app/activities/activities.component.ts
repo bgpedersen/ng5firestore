@@ -3,7 +3,6 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/forkJoin';
 import { Activity } from '../core/interfaces/Activity';
-import { DatabaseInterface } from '../core/interfaces/Database';
 import { Subscription } from 'rxjs/Subscription';
 import { DataService } from '../core/services/data.service';
 import * as moment from 'moment';
@@ -27,12 +26,13 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
   editItem: Activity;
   activities: Activity[] = [];
 
-  constructor(private dataService: DataService, private alertService: AlertService) { }
+  constructor(private dataService: DataService,
+    private alertService: AlertService) { }
 
   ngOnInit() {
     console.log('ActivitiesComponent loaded');
 
-    this.refSubs.activitiesSub = this.dataService.database.Activities$
+    this.refSubs.activitiesSub = this.dataService.observableDatabase.Activities$
       .subscribe(res => {
         this.activities = this.convertItems(res);
         console.log('ActivityComponent: this.activities: ', this.activities);
@@ -48,7 +48,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     for (let i = 0; i < items.length; i++) {
       items[i].template = {
         'listDate': moment(items[i].updatedAt).format('HH:mm - DD MMM YYYY')
-      };
+      }
     }
     items = _.orderBy(items, 'updatedAt', 'desc');
 

@@ -1,38 +1,31 @@
 import * as firebase from 'firebase';
 import * as moment from 'moment';
+import { DocumentReference } from '@firebase/firestore-types';
+import { DataDetails } from './DataDetails';
 
 export interface ActivityInterface {
   'id'?: string;
   'title'?: string;
   'description'?: string;
-  // 'timestamp'?: any;
-  'createdAt'?: any;
-  // 'updatedAt'?: any;
-  // 'template'?: any;
 }
 
-export class Activity implements ActivityInterface {
+export class Activity implements ActivityInterface, DataDetails {
   'id'?: string;
-  'title': string;
-  'description': string;
-  'timestamp': any;
-  'createdAt': any;
-  'updatedAt': any;
+  'title'?: string;
+  'description'?: string;
+  'timestamp'?: Date;
+  'createdAt'?: Date;
+  'updatedAt'?: Date;
+  'updatedBy'?: DocumentReference;
+  'createdBy'?: DocumentReference;
   'template'?: any;
-  constructor(data: ActivityInterface = {}) {
-    // const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+  [propName: string]: any;
 
+  constructor(data: ActivityInterface = {}) {
     if (data && data.id) {
       this.id = data.id;
     }
     this.title = data.title ? data.title : '';
     this.description = data.description ? data.description : '';
-
-    // this.timestamp = timestamp;
-    // this.createdAt = data.createdAt ? data.createdAt : timestamp;
-    // this.updatedAt = timestamp;
-    this.timestamp = new Date();
-    this.createdAt = data.createdAt ? data.createdAt : new Date();
-    this.updatedAt = new Date();
   }
 }

@@ -4,4 +4,5 @@ export interface User {
   photoURL?: string;
   displayName?: string;
   favoriteColor?: string;
+  [x: string]: any;
 }

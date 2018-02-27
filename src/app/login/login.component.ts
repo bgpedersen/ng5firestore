@@ -20,7 +20,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // If already logged in, go to booking instead of showing login page
-    this.userSub = this.dataService.database.User$
+    this.userSub = this.dataService.observableDatabase.User$
       .map(user => !!user)
       .subscribe(loggedIn => {
         if (loggedIn) {
