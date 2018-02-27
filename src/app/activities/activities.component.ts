@@ -9,6 +9,7 @@ import { DataService } from '../core/services/data.service';
 import * as moment from 'moment';
 import { AlertService } from '../core/services/alert.service';
 import * as _ from 'lodash';
+import { DocumentReference } from '@firebase/firestore-types';
 
 @Component({
   selector: 'app-activities',
@@ -83,8 +84,8 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
       item: new Activity(editItem),
       ref: this.dataService.serverRefs.ActivityRef
     }
-    this.dataService.updateOne(options).then(() => {
-      console.log('ActivitiesComponent: updateItem: success');
+    this.dataService.updateOne(options).then((res) => {
+      console.log('ActivitiesComponent: updateItem: success: res: ', res);
       this.alertService.createAlert({ 'type': 'success', 'message': 'Item updated' });
     }).catch(err => {
       console.log('ActivitiesComponent: updateItem: error: ', err);
@@ -97,11 +98,10 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
       item: new Activity(editItem),
       ref: this.dataService.serverRefs.ActivityRef
     }
-    this.dataService.createOne(options).then(() => {
-      console.log('ActivitiesComponent: createItem: success');
+    this.dataService.createOne(options).then((res: DocumentReference) => {
+      console.log('ActivitiesComponent: createItem: success: res: ', res);
       this.alertService.createAlert({ 'type': 'success', 'message': 'Item created' });
-      // TODO Get created ID to select it after created
-      // this.getItem()
+      this.getItem(res.id);
     }).catch(err => {
       console.log('ActivitiesComponent: createItem: error: ', err);
       this.alertService.createAlert({ 'type': 'danger', 'message': 'Item create error! ' + err });
@@ -139,8 +139,8 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     }
 
     this.dataService.createMany({ 'items': items })
-      .then(() => {
-        console.log('ActivitiesComponent: createMany: success');
+      .then((res) => {
+        console.log('ActivitiesComponent: createMany: success: res: ', res);
         this.alertService.createAlert({ 'type': 'success', 'message': 'Items created' });
       }, (err) => {
         console.log('ActivitiesComponent: createMany: error: ', err);

@@ -68,7 +68,7 @@ export class DataService {
           .update(item)
           .then(() => {
             console.log('dataService: updateOne success');
-            resolve();
+            resolve(item.id);
           }).catch(err => {
             console.error('dataService: updateOne: error: ', err);
             reject(err);
@@ -90,10 +90,11 @@ export class DataService {
         // Convert object to pure javascript
         const item = Object.assign({}, options.item);
         console.log('dataService: createOne: set item: ', item);
-        options.ref.add(item)
-          .then(() => {
-            console.log('dataService: createOne success');
-            resolve();
+
+        options.ref.ref.add(item)
+          .then((res) => {
+            console.log('dataService: createOne success: res: ', res);
+            resolve(res);
           }).catch(err => {
             console.error('dataService: createOne: error: ', err);
             reject(err);
@@ -102,7 +103,6 @@ export class DataService {
         console.log('dataService: createOne: wrong options! options: ', options);
         reject();
       }
-
     })
 
     return promise;
@@ -142,9 +142,9 @@ export class DataService {
         for (let i = 0; i < options.items.length; i++) {
           promises.push(this.createOne({ 'item': options.items[i].item, 'ref': options.items[i].ref }));
         }
-        forkJoin(promises).subscribe(() => {
-          console.log('dataService: createMany: forkJoin done');
-          resolve();
+        forkJoin(promises).subscribe((res) => {
+          console.log('dataService: createMany: forkJoin done: res: ', res);
+          resolve(res);
         }, (err) => {
           console.error('dataService: createMany: error: ', err);
           reject(err);
