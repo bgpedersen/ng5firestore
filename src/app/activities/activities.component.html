@@ -32,9 +32,16 @@
             class="list-group-item"
             [ngClass]="{'active': editItem && item.id === editItem.id}"
             (click)="getItem(item.id)">
-            <strong>ID: {{item.id}}</strong> <small>{{item.template.listDate }}</small>
-            <p>{{item.title}}<br> {{item.description}}
-            </p>
+            <div class="row">
+              <div class="col">
+                <div><strong> {{item.title}}</strong></div>
+                <div>{{item.description}}</div>
+              </div>
+              <div class="col">
+                <div class="pull-right"><small>Updated {{ item.template.updatedAt }}</small></div>
+                <div class="pull-right"><small>Created {{ item.template.createdAt }}</small></div>
+              </div>
+            </div>
           </li>
         </ul>
 
