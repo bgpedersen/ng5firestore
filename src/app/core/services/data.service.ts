@@ -123,7 +123,9 @@ export class DataService {
 
     if (action === 'created') {
       item.createdBy = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+      item.updatedBy = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
       item.createdAt = new Date();
+      item.updatedAt = new Date();
     }
     if (action === 'modified') {
       item.updatedBy = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;

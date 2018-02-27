@@ -50,7 +50,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
         'listDate': moment(items[i].updatedAt).format('HH:mm - DD MMM YYYY')
       }
     }
-    items = _.orderBy(items, 'updatedAt', 'desc');
+    items = _.orderBy(items, ['updatedAt'], 'desc');
 
     return items;
   }

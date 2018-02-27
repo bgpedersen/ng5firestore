@@ -9,40 +9,41 @@
   * Offline mode enabled
       * Enabling AngularFirestoreModule.enablePersistence will make offline mode possible, so current used data is cached, and any actions are stored and sent when back online.
       * Possible problem: There are not support for IE/Explorer - SiteKiosk for the Screens runs Explorer.
-      * Possible problem: If its only currently used data, then what about sections of the app, that the user didnt visit or is not looking at? Solution: Fetching the whole state of the server initially as individual model observables and storing this on a client sided database (using NgRx for example) solvest his problem.
   * Routing Module
       * Protected routes using Guard
       * Guard using the observable user from the Authentication service
-  * Interfaces/Classes/Models
-      * Database
-        * Responsible for maintaining the subscribeable observable relations with mapped id's etc.
-      * **Activity (needs more TypeScript/ES research to extend for view models etc.)**
-        * Using server time with firebase.firestore.FieldValue.serverTimestamp() is not fast + makes double reads because time is set after updating hence new changes.
+  * Interfaces/Classes
+      * Database (Interface, contains BehaviorSubjects to be used in the ObservableDatabase)
+      * ObservableDatabase (Interface, contains Observables from the Database)
+      * DataDetails (Interface, standard data-details to include in all data models, such as timestamp, createdAt, updatedAt etc.)
+      * ActivityInterface (Interface, Used in Activity Class to control the constructor input)
+      * Activity (Class, implements ActivityInterface & DataDetails)
       * Group
-      * User
+      * User (Contains the database user object, not the auth object)
       * AlertMessage
   * Services
-      * Alert Message service using Observable and interface and NG-Bootstrap alert component
+      * Alert Message service using NG-Bootstrap alert component (needs work!)
       * Authentication Service using AngularFireAuth and Firebase User
         * Guide: [[https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/|https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/]]
-        * Created an Auth service to inject in the Core module, that will facilitate sign-in, user session, save custom user data etc.
-        * Authentication User relation til Database user via UID (+ get user observable function)
+        * Authentication User relation to Database user via UID
+        * Exposes User observable check/data for guards, components and the DataService
         * Log in / logout (Google)
-        * Update user details
         * **User Roles ???**
         * **Create User (currently creating user if not already existing with UID) ???**
       * Data service
         * Server references object (containing all references to be maintained one place)
         * Database
-          * Always in sync with server database
-          * Contains all subscribable observables to be used in components
-        * Declares all relations as functions called in the database
-        * Handles all server CRUD's just using item(s) and the server relation
+          * Private database to keep the actual data
+          * Stores the actual server data always in sync as BehaviorSubjects (using cache)
+        * ObservableDatabase
+          * Readonly database that exposes the data from the private database as observables to the components
+        * Fetches all data from server (only if logged in)
+        * Handles all CRUD's (+implementing/updating items with DataDetails)
         * **Firebase data structure to include relations - see chapter 2**
         * **Using firebase relations in dataservice - see chapter 2**
         * **Using NgRx to handle client database actions - see chapter 2**
-  * Components
-      * Activities (+CRUD + multi create/delete)
+  * Components (using ObservableDatabase from DataService)
+      * Activities (list/details view + CRUD)
       * Users
       * Profile
   * 3rd Party libraries via NPM
