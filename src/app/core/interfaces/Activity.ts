@@ -19,6 +19,7 @@ export class Activity implements ActivityInterface, DataDetails {
   'updatedBy'?: DocumentReference;
   'createdBy'?: DocumentReference;
   'template'?: any;
+  'relationData'?: any;
   [propName: string]: any;
 
   constructor(data: ActivityInterface = {}) {

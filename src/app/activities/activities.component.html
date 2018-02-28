@@ -33,13 +33,13 @@
             [ngClass]="{'active': editItem && item.id === editItem.id}"
             (click)="getItem(item.id)">
             <div class="row">
-              <div class="col">
+              <div class="col-4">
                 <div><strong> {{item.title}}</strong></div>
                 <div>{{item.description}}</div>
               </div>
-              <div class="col">
+              <div class="col-8">
                 <div class="pull-right"><small>Updated {{ item.template.updatedAt }}</small></div>
-                <div class="pull-right"><small>Created {{ item.template.createdAt }}</small></div>
+                <div class="pull-right"><small>Created {{ item.template.createdAt }} by {{item.relationData?.createdBy.displayName}}</small></div>
               </div>
             </div>
           </li>
