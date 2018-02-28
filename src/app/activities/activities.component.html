@@ -38,7 +38,7 @@
                 <div>{{item.description}}</div>
               </div>
               <div class="col-8">
-                <div class="pull-right"><small>Updated {{ item.template.updatedAt }}</small></div>
+                <div class="pull-right"><small>Updated {{ item.template.updatedAt }} by {{item.relationData?.updatedBy.displayName}}</small></div>
                 <div class="pull-right"><small>Created {{ item.template.createdAt }} by {{item.relationData?.createdBy.displayName}}</small></div>
               </div>
             </div>

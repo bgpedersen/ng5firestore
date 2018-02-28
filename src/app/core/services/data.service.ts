@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 import { User } from '../interfaces/User';
 import { AuthService } from './auth.service';
-import { DocumentReference } from '@firebase/firestore-types';
+import { DocumentReference, CollectionReference, DocumentData } from '@firebase/firestore-types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import * as _ from 'lodash';
 
@@ -60,40 +60,54 @@ export class DataService {
       })
   }
 
-  fetchActivities() {
-    this.serverRefs.ActivityRef
+  // Global fetch collection and apply data information - returns observable
+  fetchCollection(ref: AngularFirestoreCollection<any>) {
+    return ref
       .snapshotChanges()
       .map(arr => {
         return arr.map(snap => {
           const fromCache = snap.payload.doc.metadata.fromCache;
-          console.log('dataService: fetchActivities: map fromCache: ', fromCache);
-          const obj = snap.payload.doc.data() as Activity;
+          console.log('dataService: fetchCollection: map fromCache: ', fromCache);
+          const obj = snap.payload.doc.data();
           obj.id = snap.payload.doc.id;
           return obj;
         });
       })
+  }
+
+  // Global fetch document and apply data information - returns observable
+  fetchDocument(ref: AngularFirestoreDocument<any>) {
+    return ref
+      .snapshotChanges()
+      .map(snap => {
+        const fromCache = snap.payload.metadata.fromCache;
+        console.log('dataService: fetchActivities: map fromCache: ', fromCache);
+        const obj = snap.payload.data();
+        obj.id = snap.payload.id;
+        return obj;
+      })
+  };
+
+
+  fetchActivities() {
+    this.fetchCollection(this.serverRefs.ActivityRef)
       .subscribe(res => {
         console.log('dataService: fetchActivities: res: ', res);
         // this.database._Activities.next(res);
         this.getReferences(res, 'createdBy')
           .then((res: Activity[]) => {
-            console.log('dataService: fetchActivities: res: ', res);
-            this.database._Activities.next(res)
+            this.getReferences(res, 'updatedBy')
+              .then((res: Activity[]) => {
+                console.log('dataService: fetchActivities: res: ', res);
+                this.database._Activities.next(res)
+              });
           });
       });
   }
 
   fetchUsers() {
-    this.serverRefs.UserRef
-      .snapshotChanges()
-      .map(arr => {
-        return arr.map(snap => {
-          console.log('dataService: fetchUsers: map snap: ', snap);
-          const obj = snap.payload.doc.data() as User;
-          return obj;
-        });
-      })
-      .subscribe(res => {
+    this.fetchCollection(this.serverRefs.UserRef)
+      .subscribe((res: User[]) => {
         console.log('dataService: fetchUsers: res: ', res);
         this.database._Users.next(res);
       });
@@ -251,47 +265,11 @@ export class DataService {
     return promise;
   }
 
-  // combineReferences(refs: Array<Observable<DocumentReference>>) {
-  //   return combineLatest<any[]>(refs)
-  //     .map(arr => {
-  //       return arr.map(doc => {
-  //         const fromCache = doc.metadata.fromCache;
-  //         console.log('dataService: combineReferences: map fromCache: ', fromCache);
-  //         let data = doc.data();
-  //         data.docId = doc.id;
-  //         return data;
-  //       })
-  //     })
-  // }
-
-
-  // fetchActivities() {
-  //   this.serverRefs.ActivityRef
-  //     .snapshotChanges()
-  //     .map(arr => {
-  //       return arr.map(snap => {
-  //         const fromCache = snap.payload.doc.metadata.fromCache;
-  //         console.log('dataService: fetchActivities: map fromCache: ', fromCache);
-  //         const obj = snap.payload.doc.data() as Activity;
-  //         obj.id = snap.payload.doc.id;
-  //         return obj;
-  //       });
-  //     })
-  //     .subscribe(res => {
-  //       console.log('dataService: fetchActivities: res: ', res);
-  //       // this.database._Activities.next(res);
-  //       this.getReferences(res, 'createdBy')
-  //         .then((res: Activity[]) => this.database._Activities.next(res));
-  //     });
-  // }
-
   // Function to get references data and apply it to each item without duplicates
   getReferences(items, prop) {
     let promise = new Promise((resolve, reject) => {
 
-      // var refs: Array<Observable<DocumentReference>> = [];
-      var refs = [];
-
+      var refs: Array<Observable<DocumentData>> = [];
       var sortedItems = [];
 
       // Sort out duplicate refs
@@ -310,24 +288,16 @@ export class DataService {
       // Create observables from refs
       for (let i = 0; i < sortedItems.length; i++) {
         console.log('dataService: getReferences: sortedItems[i][prop]: ', sortedItems[i][prop]);
-        refs.push(
-          this.db.doc(sortedItems[i][prop].path).snapshotChanges()
-            .map(snap => {
-              const fromCache = snap.payload.metadata.fromCache;
-              console.log('dataService: fetchActivities: map fromCache: ', fromCache);
-              const obj = snap.payload.data();
-              obj.id = snap.payload.id;
-              return obj;
-            })
-        );
-        console.log('dataService: getReferences: refs: ', refs);
+        refs.push(this.fetchDocument(this.db.doc(sortedItems[i][prop].path)));
       }
+
+      console.log('dataService: getReferences: refs: ', refs);
 
       // Fetch each document reference and convert to data
       if (refs.length) {
         combineLatest<any[]>(refs)
           .take(1)
-          .subscribe(res => {
+          .subscribe((res: any[]) => {
             console.log('dataService: getReferences: res: ', res);
             // Add reference data to items
             for (let i = 0; i < items.length; i++) {
