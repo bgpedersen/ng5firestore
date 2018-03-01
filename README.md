@@ -7,8 +7,9 @@
   * AngularFire2 library integrated in app to use Firebase
   * Angular 5 Modular structure following best practice pattern: Core module injected in App module, which provides shared features like auth, guard, interfaces, data-service, logging etc.
   * Offline mode enabled
-      * Enabling AngularFirestoreModule.enablePersistence will make offline mode possible, so current used data is cached, and any actions are stored and sent when back online.
-      * Possible problem: There are not support for IE/Explorer - SiteKiosk for the Screens runs Explorer.
+      * All current data is cached
+      * If offline then actions are remembered and called when back online
+      * Possible problem: There are not support for IE - SiteKiosk use IE
   * Routing Module
       * Protected routes using Guard
       * Guard using the observable user from the Authentication service
@@ -24,7 +25,6 @@
   * Services
       * Alert Message service using NG-Bootstrap alert component (needs work!)
       * Authentication Service using AngularFireAuth and Firebase User
-        * Guide: [[https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/|https://angularfirebase.com/lessons/google-user-auth-with-firestore-custom-data/]]
         * Authentication User relation to Database user via UID
         * Exposes User observable check/data for guards, components and the DataService
         * Log in / logout (Google)
@@ -33,19 +33,23 @@
       * Data service
         * Server references object (containing all references to be maintained one place)
         * Database
-          * Private database to keep the actual data
           * Stores the actual server data always in sync as BehaviorSubjects (using cache)
         * ObservableDatabase
           * Readonly database that exposes the data from the private database as observables to the components
         * Fetches all data from server (only if logged in)
         * Handles all CRUD's (+implementing/updating items with DataDetails)
+        * Relation Function working as a promise that fetches custom item relations (one or more references existing on the item as attributes - example: a user reference on the activity)
         * **Firebase data structure to include relations - see chapter 2**
         * **Using firebase relations in dataservice - see chapter 2**
         * **Using NgRx to handle client database actions - see chapter 2**
-  * Components (using ObservableDatabase from DataService)
+  * Components Main (using ObservableDatabase from DataService)
       * Activities (list/details view + CRUD)
       * Users
       * Profile
+  * Components Shared
+      * Navigation component
+      * ** List Component ???
+      * ** Detail Component ???
   * 3rd Party libraries via NPM
       * NG-Bootstrap
       * Bootstrap 4
