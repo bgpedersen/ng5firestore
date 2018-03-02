@@ -88,22 +88,90 @@ export class DataService {
       })
   };
 
-
   fetchActivities() {
     this.fetchCollection(this.serverRefs.ActivityRef)
       .subscribe(res => {
-        console.log('dataService: fetchActivities: res: ', res);
-        // this.database._Activities.next(res);
-        this.getReferences(res, 'createdBy')
+        // Convert to Activities
+        for (let i = 0; i < res.length; i++) {
+          res[i] = new Activity(res[i]);
+        }
+        console.log('dataService: fetchActivities: converted activities: res: ', res);
+        this.getReferences('Activity', res)
           .then((res: Activity[]) => {
-            this.getReferences(res, 'updatedBy')
-              .then((res: Activity[]) => {
-                console.log('dataService: fetchActivities: res: ', res);
-                this.database._Activities.next(res)
-              });
-          });
+            console.log('dataService: fetchActivities: after references: res: ', res);
+            this.database._Activities.next(res);
+          })
       });
   }
+
+  // Function to get references data and apply it to each item without duplicates
+  getReferences(type, items) {
+    // console.log('dataService: getReferences: type: ', type, '. items: ', items);
+    let promise = new Promise((resolve, reject) => {
+
+      var allReferences = [];
+      var sortedReferences = [];
+      var observableReferences: Array<Observable<DocumentData>> = [];
+
+      // Add all refs in one big array first
+      for (let i = 0; i < items.length; i++) {
+        if (type === 'Activity') {
+          if (items[i].relationData && items[i].relationData.createdBy) {
+            allReferences.push(items[i].relationData.createdBy.ref);
+          }
+          if (items[i].relationData && items[i].relationData.updatedBy) {
+            allReferences.push(items[i].relationData.createdBy.ref);
+          }
+        }
+      }
+      // console.log('dataService: getReferences: allReferences: ', allReferences);
+
+      // Sort out duplicates refs
+      sortedReferences = _.uniqBy(allReferences, 'id');
+      // console.log('dataService: getReferences: sortedReferences: ', sortedReferences);
+
+      // Create observables from refs using the fetchDocument function
+      for (let i = 0; i < sortedReferences.length; i++) {
+        observableReferences.push(this.fetchDocument(this.db.doc(sortedReferences[i].path)));
+      }
+      // console.log('dataService: getReferences: observableReferences: ', observableReferences);
+
+      // Fetch each document reference data
+      if (observableReferences.length) {
+        combineLatest<any[]>(observableReferences)
+          .take(1)
+          .subscribe((refData: any[]) => {
+            console.log('dataService: getReferences: combineLatest: refData: ', refData, '. items: ', items);
+
+            // Add data to items
+            for (let k = 0; k < refData.length; k++) {
+              for (let i = 0; i < items.length; i++) {
+                if (type === 'Activity') {
+                  if (items[i].relationData.createdBy.ref.id === refData[k].id) {
+                    items[i].relationData.createdBy.data = refData[k];
+                  }
+                  if (items[i].relationData.updatedBy.ref.id === refData[k].id) {
+                    items[i].relationData.updatedBy.data = refData[k];
+                  }
+                }
+              }
+            }
+            console.log('dataService: getReferences: DONE: items: ', items);
+            // return;
+
+            // Return items with implemented data in each item
+            resolve(items);
+          })
+      } else {
+        console.log('dataService: getReferences: DONE (no references): items: ', items);
+        resolve(items);
+      }
+    });
+
+    return promise;
+  }
+
+
 
   fetchUsers() {
     this.fetchCollection(this.serverRefs.UserRef)
@@ -118,13 +186,14 @@ export class DataService {
     // item.timestamp = firebase.firestore.FieldValue.serverTimestamp();
 
     if (action === 'created') {
-      item.createdBy = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
-      item.updatedBy = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+      item.relationData.createdBy.ref = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+      item.relationData.updatedBy.ref = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
       item.createdAt = new Date();
       item.updatedAt = new Date();
     }
     if (action === 'modified') {
-      item.updatedBy = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+      item.relationData.updatedBy.ref = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+      console.log('dataService: addDataDetails: item.relationData.updatedBy.ref: ', item.relationData.updatedBy.ref);
       item.updatedAt = new Date();
     }
 
@@ -264,80 +333,6 @@ export class DataService {
 
     return promise;
   }
-
-  // Function to get references data and apply it to each item without duplicates
-  getReferences(items, prop) {
-    let promise = new Promise((resolve, reject) => {
-
-      var refs: Array<Observable<DocumentData>> = [];
-      var sortedItems = [];
-
-      // Sort out duplicate refs
-      for (let i = 0; i < items.length; i++) {
-        let exists = false;
-        for (let u = 0; u < sortedItems.length; u++) {
-          if (sortedItems[u][prop].id === items[i][prop].id) {
-            exists = true;
-          }
-        }
-        if (!exists) {
-          sortedItems.push(items[i]);
-        }
-      }
-
-      // Create observables from refs
-      for (let i = 0; i < sortedItems.length; i++) {
-        console.log('dataService: getReferences: sortedItems[i][prop]: ', sortedItems[i][prop]);
-        refs.push(this.fetchDocument(this.db.doc(sortedItems[i][prop].path)));
-      }
-
-      console.log('dataService: getReferences: refs: ', refs);
-
-      // Fetch each document reference and convert to data
-      if (refs.length) {
-        combineLatest<any[]>(refs)
-          .take(1)
-          .subscribe((res: any[]) => {
-            console.log('dataService: getReferences: res: ', res);
-            // Add reference data to items
-            for (let i = 0; i < items.length; i++) {
-              for (let u = 0; u < res.length; u++) {
-                if (items[i][prop].id === res[u].id) {
-                  // Make sure not to override already existing relation data from other relations
-                  if (_.has(items[i], 'relationData')) {
-                    items[i].relationData[prop] = res[u];
-                  } else {
-                    items[i].relationData = {
-                      [prop]: res[u]
-                    };
-                  }
-                }
-              }
-            }
-            // Return items with implemented data in each item
-            resolve(items);
-          })
-      } else {
-        resolve(items);
-      }
-    });
-
-    return promise;
-
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

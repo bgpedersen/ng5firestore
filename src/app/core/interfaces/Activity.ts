@@ -1,32 +1,50 @@
-import * as firebase from 'firebase';
 import * as moment from 'moment';
-import { DocumentReference } from '@firebase/firestore-types';
-import { DataDetails } from './DataDetails';
+import { Relation } from './Relation';
+
+export interface ActivityRelations {
+  'updatedBy': Relation
+  'createdBy': Relation
+}
 
 export interface ActivityInterface {
   'id'?: string;
   'title'?: string;
   'description'?: string;
-}
-
-export class Activity implements ActivityInterface, DataDetails {
-  'id'?: string;
-  'title'?: string;
-  'description'?: string;
-  'timestamp'?: Date;
   'createdAt'?: Date;
   'updatedAt'?: Date;
-  'updatedBy'?: DocumentReference;
-  'createdBy'?: DocumentReference;
+  'relationData'?: ActivityRelations;
+  // old migrate data
+  'createdBy'?: any;
+  'updatedBy'?: any;
+}
+
+export class Activity implements ActivityInterface {
+  'id'?: string;
+  'title': string;
+  'description'?: string;
+  'timestamp'?: Date;
+  'createdAt': Date;
+  'updatedAt': Date;
   'template'?: any;
-  'relationData'?: any;
+  'relationData': ActivityRelations;
   [propName: string]: any;
 
   constructor(data: ActivityInterface = {}) {
-    if (data && data.id) {
-      this.id = data.id;
-    }
+    this.id = data.id ? data.id : null;
     this.title = data.title ? data.title : '';
     this.description = data.description ? data.description : '';
+    this.createdAt = data.createdAt ? data.createdAt : new Date();
+    this.updatedAt = data.updatedAt ? data.updatedAt : new Date();
+    this.relationData = data.relationData ? data.relationData : {
+      'updatedBy': { 'ref': null, 'data': null },
+      'createdBy': { 'ref': null, 'data': null }
+    };
+    // Old migrate data
+    if (data.createdBy) {
+      this.relationData.createdBy.ref = data.createdBy;
+    }
+    if (data.updatedBy) {
+      this.relationData.updatedBy.ref = data.updatedBy;
+    }
   }
 }
