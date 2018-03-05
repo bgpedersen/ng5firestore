@@ -16,9 +16,10 @@
   * Interfaces/Classes
       * Database (Interface, contains BehaviorSubjects to be used in the ObservableDatabase)
       * ObservableDatabase (Interface, contains Observables from the Database)
-      * DataDetails (Interface, standard data-details to include in all data models, such as timestamp, createdAt, updatedAt etc.)
+      * Relation (Interface, defining the architecture for a relation)
+      * ActivityRelation (Interface, defining all possible relations)
       * ActivityInterface (Interface, Used in Activity Class to control the constructor input)
-      * Activity (Class, implements ActivityInterface & DataDetails)
+      * Activity (Class, implements ActivityInterface, used when clicking an activity/new/updating/creating)
       * Group
       * User (Contains the database user object, not the auth object)
       * AlertMessage
@@ -38,9 +39,9 @@
           * Readonly database that exposes the data from the private database as observables to the components
         * Fetches all data from server (only if logged in)
         * Handles all CRUD's (+implementing/updating items with DataDetails)
-        * Relation Function working as a promise that fetches custom item relations (one or more references existing on the item as attributes - example: a user reference on the activity)
+        * Using batch commits for multiple deletes/writes, for example if creating 100 items at once (max 500 at once)
+        * Relation Function working as a promise that fetches all relations for that type of item and adds the data to the relationData object on the item (example reference: a user reference that created the activity)
         * **Firebase data structure to include relations - see chapter 2**
-        * **Using firebase relations in dataservice - see chapter 2**
         * **Using NgRx to handle client database actions - see chapter 2**
   * Components Main (using ObservableDatabase from DataService)
       * Activities (list/details view + CRUD)

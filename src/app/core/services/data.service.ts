@@ -1,5 +1,5 @@
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Activity } from '../interfaces/Activity';
+import { Activity, ActivityInterface } from '../interfaces/Activity';
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { Observable } from 'rxjs/Observable';
@@ -90,11 +90,11 @@ export class DataService {
 
   fetchActivities() {
     this.fetchCollection(this.serverRefs.ActivityRef)
-      .subscribe(res => {
+      .subscribe((res: Activity[]) => {
         // Convert to Activities
-        for (let i = 0; i < res.length; i++) {
-          res[i] = new Activity(res[i]);
-        }
+        // for (let i = 0; i < res.length; i++) {
+        //   res[i] = new Activity(res[i]);
+        // }
         console.log('dataService: fetchActivities: converted activities: res: ', res);
         this.getReferences('Activity', res)
           .then((res: Activity[]) => {
@@ -157,7 +157,6 @@ export class DataService {
               }
             }
             console.log('dataService: getReferences: DONE: items: ', items);
-            // return;
 
             // Return items with implemented data in each item
             resolve(items);
@@ -285,20 +284,30 @@ export class DataService {
   }
 
   createMany(options: { items: any[] }) {
+    console.log('dataService: createMany: options.items: ', options.items);
     const promise = new Promise((resolve, reject) => {
+      // Create batch
+      let batch = this.db.firestore.batch();
 
       if (options.items && options.items.length) {
-        const promises = [];
         for (let i = 0; i < options.items.length; i++) {
-          promises.push(this.createOne({ 'item': options.items[i].item, 'ref': options.items[i].ref }));
+          // Add data details
+          options.items[i].item = this.addDataDetails(options.items[i].item, 'created');
+
+          // Convert object to pure javascript
+          const item = Object.assign({}, options.items[i].item);
+          // Insert to batch
+          batch.set(options.items[i].ref, item);
         }
-        forkJoin(promises).subscribe((res) => {
-          console.log('dataService: createMany: forkJoin done: res: ', res);
-          resolve(res);
-        }, (err) => {
-          console.error('dataService: createMany: error: ', err);
-          reject(err);
-        });
+        // Commit the batch
+        batch.commit()
+          .then((res) => {
+            console.log('dataService: createMany: batch commit done!');
+            resolve();
+          }, (err) => {
+            console.error('dataService: createMany: error: ', err);
+            reject(err);
+          });
       } else {
         console.log('dataService: createMany: wrong options! options: ', options);
         reject();
@@ -310,26 +319,52 @@ export class DataService {
   }
 
   deleteMany(options: { items: any[] }) {
+    console.log('dataService: deleteMany: options.items: ', options.items);
     const promise = new Promise((resolve, reject) => {
+      // Create batch
+      let batch = this.db.firestore.batch();
 
       if (options.items && options.items.length) {
-        const promises = [];
         for (let i = 0; i < options.items.length; i++) {
-          promises.push(this.deleteOne({ 'item': options.items[i].item, 'ref': options.items[i].ref }));
+          // Insert to batch
+          batch.delete(options.items[i].ref);
         }
-        forkJoin(promises).subscribe(() => {
-          console.log('dataService: deleteMany: forkJoin done');
-          resolve();
-        }, (err) => {
-          console.error('dataService: deleteMany: error: ', err);
-          reject(err);
-        });
+        // Commit the batch
+        batch.commit()
+          .then((res) => {
+            console.log('dataService: deleteMany: batch commit done!');
+            resolve();
+          }, (err) => {
+            console.error('dataService: deleteMany: error: ', err);
+            reject(err);
+          });
       } else {
         console.log('dataService: deleteMany: wrong options! options: ', options);
         reject();
       }
 
     })
+
+    // const promise = new Promise((resolve, reject) => {
+
+    //   if (options.items && options.items.length) {
+    //     const promises = [];
+    //     for (let i = 0; i < options.items.length; i++) {
+    //       promises.push(this.deleteOne({ 'item': options.items[i].item, 'ref': options.items[i].ref }));
+    //     }
+    //     forkJoin(promises).subscribe(() => {
+    //       console.log('dataService: deleteMany: forkJoin done');
+    //       resolve();
+    //     }, (err) => {
+    //       console.error('dataService: deleteMany: error: ', err);
+    //       reject(err);
+    //     });
+    //   } else {
+    //     console.log('dataService: deleteMany: wrong options! options: ', options);
+    //     reject();
+    //   }
+
+    // })
 
     return promise;
   }

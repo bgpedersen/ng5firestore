@@ -75,7 +75,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
   getItem(id) {
     for (let i = 0; i < this.activities.length; i++) {
       if (this.activities[i].id === id) {
-        this.editItem = this.activities[i];
+        this.editItem = new Activity(this.activities[i]);
         console.log('ActivitiesComponent: getItem: this.editItem: ', this.editItem);
       }
     }
@@ -135,14 +135,14 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
       };
       const options = {
         item: new Activity(obj),
-        ref: this.dataService.serverRefs.ActivityRef
+        ref: this.dataService.serverRefs.ActivityRef.ref.doc()
       }
       items.push(options);
     }
 
     this.dataService.createMany({ 'items': items })
-      .then((res) => {
-        console.log('ActivitiesComponent: createMany: success: res: ', res);
+      .then(() => {
+        console.log('ActivitiesComponent: createMany: success!');
         this.alertService.createAlert({ 'type': 'success', 'message': 'Items created' });
       }, (err) => {
         console.log('ActivitiesComponent: createMany: error: ', err);
@@ -155,8 +155,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
 
     for (let i = 0; i < this.activities.length; i++) {
       const options = {
-        item: new Activity(this.activities[i]),
-        ref: this.dataService.serverRefs.ActivityRef
+        ref: this.dataService.serverRefs.ActivityRef.ref.doc(this.activities[i].id)
       }
       items.push(options);
     }
