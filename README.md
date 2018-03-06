@@ -46,6 +46,7 @@
           * Sort out duplicates
           * Combines all fetches of the relations for a specified type of item (example: Activity)
           * Adds the response data to the relationData object on each item using the structure of the Relation interface
+        * **Lazy load limit (example load 50 activities first, and when scroll to end, load more)**
         * **Firebase data structure to include relations - see chapter 2**
         * **Using NgRx to handle client database actions - see chapter 2**
   * Components Main (using ObservableDatabase from DataService)
@@ -59,6 +60,7 @@
   * 3rd Party libraries via NPM
       * NG-Bootstrap
       * Bootstrap 4
+        * **Application optimize for responsive viewing ???**
       * Font-Awesome
       * Moment
       * Lodash

@@ -1,106 +1,116 @@
 <div class="row">
   <div class="col-12">
-
-    <app-shared-navigation> </app-shared-navigation>
-    <h2>
-      Activities
-    </h2>
-
-    <button (click)="newItem()"
-      class="btn btn-outline-info">New</button>
-
-    <button (click)="createMany(count)"
-      class="btn btn-outline-info">Auto Create #</button>
-    <input type="number"
-      step="1"
-      max="500"
-      [(ngModel)]="count">
-
-    <button [disabled]="activities.length === 0"
-      (click)="deleteAll()"
-      class="btn btn-outline-danger">Delete all</button>
-
-    <div class="row">
-
-      <div class="col-4">
-        <h3>List of activities
-          <span class="badge badge-pill badge-info">{{activities ? activities.length : 0}}</span>
-        </h3>
-
-        <ul class="list-group">
-          <li *ngFor="let item of activities"
-            class="list-group-item"
-            [ngClass]="{'active': editItem && item.id === editItem.id}"
-            (click)="getItem(item.id)">
-            <div class="row">
-              <div class="col-4">
-                <div><strong> {{item.title}}</strong></div>
-                <div>{{item.description}}</div>
-              </div>
-              <div class="col-8">
-                <div class="pull-right"><small>Updated {{ item.template.updatedAt }} by {{item.relationData?.updatedBy.data.displayName}}</small></div>
-                <div class="pull-right"><small>Created {{ item.template.createdAt }} by {{item.relationData?.createdBy.data.displayName}}</small></div>
-              </div>
-            </div>
-          </li>
-        </ul>
-
+    <div style="height: 7vh">
+      <div class="row">
+        <div class="col-12">
+          <app-shared-navigation> </app-shared-navigation>
+        </div>
       </div>
+    </div>
+
+    <div style="height: 93vh">
+      <div class="row">
+
+        <div class="col-2">
+          <h2>
+            Activities
+          </h2>
+
+          <button (click)="newItem()"
+            class="btn btn-outline-info">New</button>
+
+          <button (click)="createMany(count)"
+            class="btn btn-outline-info">Auto Create #</button>
+          <input type="number"
+            step="1"
+            max="500"
+            [(ngModel)]="count">
+
+          <button [disabled]="activities.length === 0"
+            (click)="deleteAll()"
+            class="btn btn-outline-danger">Delete all</button>
+        </div>
 
 
 
-      <div class="col-8">
-
-        <div *ngIf="editItem">
-          <h4>Item</h4>
-
-          <form name="editItemForm">
-
-            <div class="form-group">
-              <label for="title">Title</label>
-              <input type="text"
-                name="title"
-                class="form-control"
-                placeholder="Title"
-                [(ngModel)]="editItem.title">
+        <div class="col-4">
+          <div class="list">
+            <div class="list-top">
+              <h3>List of activities
+                <span class="badge badge-pill badge-info pull-right">{{activities ? activities.length : 0}}</span>
+              </h3>
             </div>
-            <div class="form-group">
-              <label for="description">Description</label>
-              <input type="text"
-                name="description"
-                class="form-control"
-                placeholder="Description"
-                [(ngModel)]="editItem.description">
-            </div>
 
-            <button (click)="updateItem(editItem)"
-              *ngIf="editItem.id"
-              type="submit"
-              class="btn btn-outline-success"
-              [disabled]="!editItem.title">Update</button>
+            <ul class="list-group">
+              <li *ngFor="let item of activities"
+                class="list-group-item"
+                [ngClass]="{'active': editItem && item.id === editItem.id}"
+                (click)="getItem(item.id)">
+                <div class="row">
+                  <div class="col-4">
+                    <div><strong> {{item.title}}</strong></div>
+                    <div>{{item.description}}</div>
+                  </div>
+                  <div class="col-8">
+                    <div class="pull-right"><small>Updated {{ item.template.updatedAt }} by <span [ngStyle]="{'color': item.relationData.updatedBy.data.favoriteColor}">{{item.relationData.updatedBy.data.displayName}}</span></small></div>
+                    <div class="pull-right"><small>Created {{ item.template.createdAt }} by <span [ngStyle]="{'color': item.relationData.updatedBy.data.favoriteColor}">{{item.relationData.createdBy.data.displayName}}</span></small></div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
 
-            <button (click)="createItem(editItem)"
-              *ngIf="!editItem.id"
-              type="submit"
-              class="btn btn-outline-success"
-              [disabled]="!editItem.title">Create</button>
 
-            <button (click)="deleteItem(editItem)"
-              *ngIf="editItem.id"
-              class="btn btn-outline-danger">Delete</button>
+        <div class="col-6">
+          <div *ngIf="editItem">
+            <h4>Item</h4>
 
-            <button (click)="clearItem()"
-              class="btn btn-outline-warning">Cancel</button>
+            <form name="editItemForm">
 
-          </form>
+              <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text"
+                  name="title"
+                  class="form-control"
+                  placeholder="Title"
+                  [(ngModel)]="editItem.title">
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text"
+                  name="description"
+                  class="form-control"
+                  placeholder="Description"
+                  [(ngModel)]="editItem.description">
+              </div>
 
+              <button (click)="updateItem(editItem)"
+                *ngIf="editItem.id"
+                type="submit"
+                class="btn btn-outline-success"
+                [disabled]="!editItem.title">Update</button>
+
+              <button (click)="createItem(editItem)"
+                *ngIf="!editItem.id"
+                type="submit"
+                class="btn btn-outline-success"
+                [disabled]="!editItem.title">Create</button>
+
+              <button (click)="deleteItem(editItem)"
+                *ngIf="editItem.id"
+                class="btn btn-outline-danger">Delete</button>
+
+              <button (click)="clearItem()"
+                class="btn btn-outline-warning">Cancel</button>
+
+            </form>
+          </div>
         </div>
 
       </div>
-
-
+      <!-- /row -->
     </div>
-    <!-- /row -->
 
   </div>
 </div>
