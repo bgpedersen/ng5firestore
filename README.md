@@ -40,7 +40,12 @@
         * Fetches all data from server (only if logged in)
         * Handles all CRUD's (+implementing/updating items with standard info such as updatedAt, createdAt, + inserting user references for updatedBy and createdBy)
         * Using batch commits for multiple deletes/writes, for example if creating 100 items at once (max 500 at once)
-        * Relation Function working as a promise that fetches all relations for that type of item and adds the data to the relationData object on the item (example reference: a user reference that created the activity)
+        * Data Relation Function
+          * Working as a promise
+          * Reads all firestore references on one or more items
+          * Sort out duplicates
+          * Combines all fetches of the relations for a specified type of item (example: Activity)
+          * Adds the response data to the relationData object on each item using the structure of the Relation interface
         * **Firebase data structure to include relations - see chapter 2**
         * **Using NgRx to handle client database actions - see chapter 2**
   * Components Main (using ObservableDatabase from DataService)
