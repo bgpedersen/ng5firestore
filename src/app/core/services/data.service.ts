@@ -14,6 +14,7 @@ import { AuthService } from './auth.service';
 import { DocumentReference, CollectionReference, DocumentData } from '@firebase/firestore-types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import * as _ from 'lodash';
+import { Group } from '../interfaces/Group';
 
 
 @Injectable()
@@ -21,6 +22,7 @@ export class DataService {
 
   serverRefs = {
     'ActivityRef': this.db.collection<Activity>('activities'),
+    'GroupRef': this.db.collection<Group>('groups'),
     'UserRef': this.db.collection<User>('users')
   }
 
@@ -28,14 +30,16 @@ export class DataService {
   private database: Database = {
     '_User': new BehaviorSubject(null),
     '_Users': new BehaviorSubject([]),
-    '_Activities': new BehaviorSubject([])
+    '_Activities': new BehaviorSubject([]),
+    '_Groups': new BehaviorSubject([])
   };
 
   // Readable database that exposes the data as observables
   public readonly observableDatabase: ObservableDatabase = {
     'User$': this.database._User.asObservable(),
     'Users$': this.database._Users.asObservable(),
-    'Activities$': this.database._Activities.asObservable()
+    'Activities$': this.database._Activities.asObservable(),
+    'Groups$': this.database._Groups.asObservable()
   }
 
   constructor(public db: AngularFirestore,
@@ -53,6 +57,7 @@ export class DataService {
           // Logged in - update user and subscribe
           this.database._User.next(user);
           this.fetchActivities();
+          this.fetchGroups();
           this.fetchUsers();
         } else {
           // Kill subscribes ?
@@ -60,7 +65,7 @@ export class DataService {
       })
   }
 
-  // Global fetch collection and apply data information - returns observable
+  // **** Global fetch collection/document and apply data information - returns observable
   fetchCollection(ref: AngularFirestoreCollection<any>) {
     return ref
       .snapshotChanges()
@@ -75,7 +80,6 @@ export class DataService {
       })
   }
 
-  // Global fetch document and apply data information - returns observable
   fetchDocument(ref: AngularFirestoreDocument<any>) {
     return ref
       .snapshotChanges()
@@ -88,18 +92,30 @@ export class DataService {
       })
   };
 
+  // **** Global fetch end
+
+
+
   fetchActivities() {
     this.fetchCollection(this.serverRefs.ActivityRef)
       .subscribe((res: Activity[]) => {
-        // Convert to Activities
-        // for (let i = 0; i < res.length; i++) {
-        //   res[i] = new Activity(res[i]);
-        // }
-        console.log('dataService: fetchActivities: converted activities: res: ', res);
+        console.log('dataService: fetchActivities: res: ', res);
         this.getReferences('Activity', res)
           .then((res: Activity[]) => {
             console.log('dataService: fetchActivities: after references: res: ', res);
             this.database._Activities.next(res);
+          })
+      });
+  }
+
+  fetchGroups() {
+    this.fetchCollection(this.serverRefs.GroupRef)
+      .subscribe((res: Group[]) => {
+        console.log('dataService: fetchGroups: res: ', res);
+        this.getReferences('Group', res)
+          .then((res: Group[]) => {
+            console.log('dataService: fetchGroups: after references: res: ', res);
+            this.database._Groups.next(res);
           })
       });
   }
@@ -115,12 +131,26 @@ export class DataService {
 
       // Add all refs in one big array first
       for (let i = 0; i < items.length; i++) {
+        // Global for all
+        if (items[i].relationData.createdBy) {
+          allReferences.push(items[i].relationData.createdBy.ref);
+        }
+        if (items[i].relationData.updatedBy) {
+          allReferences.push(items[i].relationData.updatedBy.ref);
+        }
+        // Specifics
         if (type === 'Activity') {
-          if (items[i].relationData && items[i].relationData.createdBy) {
-            allReferences.push(items[i].relationData.createdBy.ref);
+          if (items[i].relationData.groups) {
+            for (let u = 0; u < items[i].relationData.groups.length; u++) {
+              allReferences.push(items[i].relationData.groups[u].ref);
+            }
           }
-          if (items[i].relationData && items[i].relationData.updatedBy) {
-            allReferences.push(items[i].relationData.createdBy.ref);
+        }
+        if (type === 'Group') {
+          if (items[i].relationData.activities) {
+            for (let u = 0; u < items[i].relationData.activities.length; u++) {
+              allReferences.push(items[i].relationData.activities[u].ref);
+            }
           }
         }
       }
@@ -146,12 +176,30 @@ export class DataService {
             // Add data to items
             for (let k = 0; k < refData.length; k++) {
               for (let i = 0; i < items.length; i++) {
+                // Global for all
+                if (items[i].relationData.createdBy.ref.id === refData[k].id) {
+                  items[i].relationData.createdBy.data = refData[k];
+                }
+                if (items[i].relationData.updatedBy.ref.id === refData[k].id) {
+                  items[i].relationData.updatedBy.data = refData[k];
+                }
+                // Specifics
                 if (type === 'Activity') {
-                  if (items[i].relationData.createdBy.ref.id === refData[k].id) {
-                    items[i].relationData.createdBy.data = refData[k];
+                  if (items[i].relationData.groups) {
+                    for (let u = 0; u < items[i].relationData.groups.length; u++) {
+                      if (items[i].relationData.groups[u].ref.id === refData[k].id) {
+                        items[i].relationData.groups[u].data = refData[k];
+                      }
+                    }
                   }
-                  if (items[i].relationData.updatedBy.ref.id === refData[k].id) {
-                    items[i].relationData.updatedBy.data = refData[k];
+                }
+                if (type === 'Group') {
+                  if (items[i].relationData.activities) {
+                    for (let u = 0; u < items[i].relationData.activities.length; u++) {
+                      if (items[i].relationData.activities[u].ref.id === refData[k].id) {
+                        items[i].relationData.activities[u].data = refData[k];
+                      }
+                    }
                   }
                 }
               }
@@ -184,15 +232,16 @@ export class DataService {
     // Adding fieldValue will make double read updates because time is added with a delay server-side !!!
     // item.timestamp = firebase.firestore.FieldValue.serverTimestamp();
 
+    let userRef = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+
     if (action === 'created') {
-      item.relationData.createdBy.ref = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
-      item.relationData.updatedBy.ref = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+      item.relationData.createdBy.ref = _.clone(userRef);
+      item.relationData.updatedBy.ref = _.clone(userRef);
       item.createdAt = new Date();
       item.updatedAt = new Date();
     }
     if (action === 'modified') {
-      item.relationData.updatedBy.ref = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
-      console.log('dataService: addDataDetails: item.relationData.updatedBy.ref: ', item.relationData.updatedBy.ref);
+      item.relationData.updatedBy.ref = _.clone(userRef);
       item.updatedAt = new Date();
     }
 
@@ -235,11 +284,19 @@ export class DataService {
       if (options.item) {
         // Add data details
         options.item = this.addDataDetails(options.item, 'created');
+        console.log('dataService: createOne: options.item: ', options.item);
+        // return;
+
+        // PROBLEM: TO INSERT DATA TO FIRESTORE DATABASE, ONLY PURE JAVASCRIPT IS ALLOWED
+        // THEREFORE OBJECT ASSIGN WOULD WORK, BUT IT DOES NOT WORK WITH DEEP OBJECTS
+        // THEN NORMALLY STRINGIFY WOULD WORKD, BUT THAT DOES NOT WORK ON FIRESTORE REFERENCES BECAUSE THEY ARE CIRCULAR DEPENDENCIES
 
         // Convert object to pure javascript
-        const item = Object.assign({}, options.item);
-        console.log('dataService: createOne: set item: ', item);
-
+        let item = Object.assign({}, options.item);
+        // let stringify = JSON.stringify(options.item)
+        // console.log('dataService: createOne: stringify: ', stringify);
+        // let item = JSON.parse(stringify);
+        console.log('dataService: createOne: item: ', item);
         options.ref.ref.add(item)
           .then((res) => {
             console.log('dataService: createOne success: res: ', res);
@@ -290,7 +347,7 @@ export class DataService {
       let batch = this.db.firestore.batch();
 
       if (options.items && options.items.length) {
-        for (let i = 0; i < options.items.length; i++) {
+        for (let i = 0; i < options.items.length && i < 500; i++) {
           // Add data details
           options.items[i].item = this.addDataDetails(options.items[i].item, 'created');
 
@@ -325,7 +382,7 @@ export class DataService {
       let batch = this.db.firestore.batch();
 
       if (options.items && options.items.length) {
-        for (let i = 0; i < options.items.length; i++) {
+        for (let i = 0; i < options.items.length && i < 500; i++) {
           // Insert to batch
           batch.delete(options.items[i].ref);
         }

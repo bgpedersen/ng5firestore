@@ -75,7 +75,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
   getItem(id) {
     for (let i = 0; i < this.activities.length; i++) {
       if (this.activities[i].id === id) {
-        this.editItem = new Activity(this.activities[i]);
+        this.editItem = new Activity(this.activities[i], true);
         console.log('ActivitiesComponent: getItem: this.editItem: ', this.editItem);
       }
     }
