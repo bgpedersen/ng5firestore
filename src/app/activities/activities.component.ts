@@ -100,6 +100,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
       item: new Activity(editItem),
       ref: this.dataService.serverRefs.ActivityRef
     }
+
     this.dataService.createOne(options).then((res: DocumentReference) => {
       console.log('ActivitiesComponent: createItem: success: res: ', res);
       this.alertService.createAlert({ 'type': 'success', 'message': 'Item created' });

@@ -2,9 +2,9 @@ import * as moment from 'moment';
 import { Relation } from './Relation';
 
 export interface ActivityRelations {
-  'updatedBy': Relation,
-  'createdBy': Relation,
-  'groups': Relation[]
+  'updatedBy'?: Relation,
+  'createdBy'?: Relation,
+  'groups'?: Relation[]
 }
 
 export interface ActivityInterface {
@@ -45,6 +45,14 @@ export class Activity implements ActivityInterface {
       newRelations.push(new Relation(relations[i], keepRelationData));
     }
     return newRelations;
+  }
+
+  convertToPureJS() {
+    // Convert object to pure javascript
+    let pureItem = Object.assign({}, this);
+    pureItem.relationData.createdBy = Object.assign({}, pureItem.relationData.createdBy);
+    pureItem.relationData.updatedBy = Object.assign({}, pureItem.relationData.updatedBy);
+    return pureItem;
   }
 
 }

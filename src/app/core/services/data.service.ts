@@ -235,13 +235,13 @@ export class DataService {
     let userRef = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
 
     if (action === 'created') {
-      item.relationData.createdBy.ref = _.clone(userRef);
-      item.relationData.updatedBy.ref = _.clone(userRef);
+      item.relationData.createdBy.ref = userRef;
+      item.relationData.updatedBy.ref = userRef;
       item.createdAt = new Date();
       item.updatedAt = new Date();
     }
     if (action === 'modified') {
-      item.relationData.updatedBy.ref = _.clone(userRef);
+      item.relationData.updatedBy.ref = userRef;
       item.updatedAt = new Date();
     }
 
@@ -256,7 +256,7 @@ export class DataService {
         options.item = this.addDataDetails(options.item, 'modified');
 
         // Convert object to pure javascript
-        const item = Object.assign({}, options.item);
+        let item = options.item.convertToPureJS();
 
         console.log('dataService: updateOne: update item: ', item);
         options.ref.doc(item.id)
@@ -284,18 +284,10 @@ export class DataService {
       if (options.item) {
         // Add data details
         options.item = this.addDataDetails(options.item, 'created');
-        console.log('dataService: createOne: options.item: ', options.item);
-        // return;
-
-        // PROBLEM: TO INSERT DATA TO FIRESTORE DATABASE, ONLY PURE JAVASCRIPT IS ALLOWED
-        // THEREFORE OBJECT ASSIGN WOULD WORK, BUT IT DOES NOT WORK WITH DEEP OBJECTS
-        // THEN NORMALLY STRINGIFY WOULD WORKD, BUT THAT DOES NOT WORK ON FIRESTORE REFERENCES BECAUSE THEY ARE CIRCULAR DEPENDENCIES
 
         // Convert object to pure javascript
-        let item = Object.assign({}, options.item);
-        // let stringify = JSON.stringify(options.item)
-        // console.log('dataService: createOne: stringify: ', stringify);
-        // let item = JSON.parse(stringify);
+        let item = options.item.convertToPureJS();
+
         console.log('dataService: createOne: item: ', item);
         options.ref.ref.add(item)
           .then((res) => {
@@ -318,10 +310,7 @@ export class DataService {
     const promise = new Promise((resolve, reject) => {
 
       if (options.item) {
-        // Convert object to pure javascript
-        const item = Object.assign({}, options.item);
-        console.log('dataService: deleteOne: update item: ', item);
-        options.ref.doc(item.id)
+        options.ref.doc(options.item.id)
           .delete()
           .then(() => {
             console.log('dataService: deleteOne success');
@@ -352,7 +341,8 @@ export class DataService {
           options.items[i].item = this.addDataDetails(options.items[i].item, 'created');
 
           // Convert object to pure javascript
-          const item = Object.assign({}, options.items[i].item);
+          let item = options.items[i].item.convertToPureJS();
+
           // Insert to batch
           batch.set(options.items[i].ref, item);
         }
@@ -401,27 +391,6 @@ export class DataService {
       }
 
     })
-
-    // const promise = new Promise((resolve, reject) => {
-
-    //   if (options.items && options.items.length) {
-    //     const promises = [];
-    //     for (let i = 0; i < options.items.length; i++) {
-    //       promises.push(this.deleteOne({ 'item': options.items[i].item, 'ref': options.items[i].ref }));
-    //     }
-    //     forkJoin(promises).subscribe(() => {
-    //       console.log('dataService: deleteMany: forkJoin done');
-    //       resolve();
-    //     }, (err) => {
-    //       console.error('dataService: deleteMany: error: ', err);
-    //       reject(err);
-    //     });
-    //   } else {
-    //     console.log('dataService: deleteMany: wrong options! options: ', options);
-    //     reject();
-    //   }
-
-    // })
 
     return promise;
   }
