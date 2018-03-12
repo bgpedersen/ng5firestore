@@ -270,7 +270,7 @@ export class DataService {
         reject();
       }
 
-    })
+    });
 
     return promise;
   }

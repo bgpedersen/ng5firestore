@@ -83,13 +83,13 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
 
   updateItem(editItem) {
     const option = {
-      item: new Activity(editItem),
+      item: editItem,
       ref: this.dataService.serverRefs.ActivityRef,
     }
     this.dataService.updateOne(option).then((res) => {
       console.log('ActivitiesComponent: updateItem: success: res: ', res);
       this.alertService.createAlert({ type: 'success', message: 'Item updated' });
-    }).catch(err => {
+    }).catch((err) => {
       console.log('ActivitiesComponent: updateItem: error: ', err);
       this.alertService.createAlert({ type: 'danger', message: 'Item update error! ' + err });
     });
@@ -114,7 +114,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
 
   deleteItem(editItem) {
     const option = {
-      item: new Activity(editItem),
+      item: editItem,
       ref: this.dataService.serverRefs.ActivityRef,
     }
     this.dataService.deleteOne(option).then(() => {
@@ -131,12 +131,11 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     const options = [];
 
     for (let i = 0; i < count; i++) {
-      const obj = {
-        title: 'Auto title #' + i,
-        description: 'Auto description #' + i,
-      };
+      const obj = new Activity();
+      obj.title = 'Auto title #' + i;
+      obj.description = 'Auto description #' + i;
       const option = {
-        item: new Activity(obj),
+        item: obj,
         ref: this.dataService.serverRefs.ActivityRef.ref.doc(),
       };
       options.push(option);

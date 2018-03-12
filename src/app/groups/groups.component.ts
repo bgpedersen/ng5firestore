@@ -83,21 +83,22 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   updateItem(editItem) {
     const option = {
-      item: new Group(editItem),
+      item: editItem,
       ref: this.dataService.serverRefs.GroupRef,
     }
     this.dataService.updateOne(option).then((res) => {
       console.log('GroupsComponent: updateItem: success: res: ', res);
       this.alertService.createAlert({ type: 'success', message: 'Item updated' });
-    }).catch(err => {
+    }).catch((err) => {
       console.log('GroupsComponent: updateItem: error: ', err);
       this.alertService.createAlert({ type: 'danger', message: 'Item update error! ' + err });
     });
   }
 
   createItem(editItem) {
+
     const option = {
-      item: new Group(editItem),
+      item: editItem,
       ref: this.dataService.serverRefs.GroupRef,
     }
 
@@ -105,7 +106,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
       console.log('GroupsComponent: createItem: success: res: ', res);
       this.alertService.createAlert({ type: 'success', message: 'Item created' });
       this.getItem(res.id);
-    }).catch(err => {
+    }).catch((err) => {
       console.log('GroupsComponent: createItem: error: ', err);
       this.alertService.createAlert({ type: 'danger', message: 'Item create error! ' + err });
     });
@@ -113,14 +114,14 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   deleteItem(editItem) {
     const option = {
-      item: new Group(editItem),
+      item: editItem,
       ref: this.dataService.serverRefs.GroupRef,
-    }
+    };
     this.dataService.deleteOne(option).then(() => {
       console.log('GroupsComponent: deleteItem: success');
       this.alertService.createAlert({ type: 'success', message: 'Item deleted' });
       this.clearItem();
-    }).catch(err => {
+    }).catch((err) => {
       console.log('GroupsComponent: deleteItem: error: ', err);
       this.alertService.createAlert({ type: 'danger', message: 'Item delete error! ' + err });
     });
@@ -130,12 +131,11 @@ export class GroupsComponent implements OnInit, OnDestroy {
     const options = [];
 
     for (let i = 0; i < count; i++) {
-      const obj = {
-        title: 'Auto title #' + i,
-        description: 'Auto description #' + i,
-      };
+      const obj = new Group();
+      obj.title = 'Auto title #' + i;
+      obj.description = 'Auto description #' + i;
       const option = {
-        item: new Group(obj),
+        item: obj,
         ref: this.dataService.serverRefs.GroupRef.ref.doc(),
       };
       options.push(option);
