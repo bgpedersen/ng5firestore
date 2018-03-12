@@ -10,8 +10,6 @@ export interface DataModel {
   template?: any;
   databaseModel?: any;
 
-  convertToPureJS();
-  convertToDatabaseModel(){
-  return true;
-}
+  convertToDatabaseModel();
+  addPureRelation(data);
 }

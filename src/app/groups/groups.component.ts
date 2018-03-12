@@ -1,16 +1,16 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AngularFirestore, AngularFirestoreDocument } from 'angularfire2/firestore';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/forkJoin';
-import { Group } from '../core/interfaces/Group';
-import { Subscription } from 'rxjs/Subscription';
-import { DataService } from '../core/services/data.service';
-import * as moment from 'moment';
-import { AlertService } from '../core/services/alert.service';
-import * as _ from 'lodash';
 import { DocumentReference } from '@firebase/firestore-types';
+import { AngularFirestore, AngularFirestoreDocument } from 'angularfire2/firestore';
+import * as _ from 'lodash';
+import * as moment from 'moment';
+import 'rxjs/add/observable/forkJoin';
+import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { map } from 'rxjs/operator/map';
+import { Subscription } from 'rxjs/Subscription';
+import { Group } from '../core/interfaces/Group';
+import { AlertService } from '../core/services/alert.service';
+import { DataService } from '../core/services/data.service';
 
 @Component({
   selector: 'app-groups',
@@ -20,14 +20,13 @@ import { map } from 'rxjs/operator/map';
 export class GroupsComponent implements OnInit, OnDestroy {
 
   refSubs = {
-    'groupsSub': null as Subscription
+    groupsSub: null as Subscription,
   };
 
   count = 10;
 
   editItem: Group;
   groups: Group[] = [];
-
 
   constructor(private dataService: DataService,
     private alertService: AlertService) { }
@@ -47,12 +46,13 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   // Convert items are unique convertions of the items for this component
   convertItems(items) {
-    for (let i = 0; i < items.length; i++) {
-      items[i].template = {
-        'updatedAt': moment(items[i].updatedAt).format('HH:mm - DD MMM YYYY'),
-        'createdAt': moment(items[i].createdAt).format('HH:mm - DD MMM YYYY')
-      }
+    for (const item of items) {
+      item.template = {
+        updatedAt: moment(item.updatedAt).format('HH:mm - DD MMM YYYY'),
+        createdAt: moment(item.createdAt).format('HH:mm - DD MMM YYYY'),
+      };
     }
+
     items = _.orderBy(items, ['updatedAt'], 'desc');
 
     return items;
@@ -73,109 +73,107 @@ export class GroupsComponent implements OnInit, OnDestroy {
   }
 
   getItem(id) {
-    for (let i = 0; i < this.groups.length; i++) {
-      if (this.groups[i].id === id) {
-        this.editItem = new Group(this.groups[i]);
+    for (const item of this.groups) {
+      if (item.id === id) {
+        this.editItem = new Group(item);
         console.log('GroupsComponent: getItem: this.editItem: ', this.editItem);
       }
     }
   }
 
   updateItem(editItem) {
-    const options = {
+    const option = {
       item: new Group(editItem),
-      ref: this.dataService.serverRefs.GroupRef
+      ref: this.dataService.serverRefs.GroupRef,
     }
-    this.dataService.updateOne(options).then((res) => {
+    this.dataService.updateOne(option).then((res) => {
       console.log('GroupsComponent: updateItem: success: res: ', res);
-      this.alertService.createAlert({ 'type': 'success', 'message': 'Item updated' });
+      this.alertService.createAlert({ type: 'success', message: 'Item updated' });
     }).catch(err => {
       console.log('GroupsComponent: updateItem: error: ', err);
-      this.alertService.createAlert({ 'type': 'danger', 'message': 'Item update error! ' + err });
+      this.alertService.createAlert({ type: 'danger', message: 'Item update error! ' + err });
     });
   }
 
   createItem(editItem) {
-    const options = {
+    const option = {
       item: new Group(editItem),
-      ref: this.dataService.serverRefs.GroupRef
+      ref: this.dataService.serverRefs.GroupRef,
     }
-    this.dataService.createOne(options).then((res: DocumentReference) => {
+
+    this.dataService.createOne(option).then((res: DocumentReference) => {
       console.log('GroupsComponent: createItem: success: res: ', res);
-      this.alertService.createAlert({ 'type': 'success', 'message': 'Item created' });
+      this.alertService.createAlert({ type: 'success', message: 'Item created' });
       this.getItem(res.id);
     }).catch(err => {
       console.log('GroupsComponent: createItem: error: ', err);
-      this.alertService.createAlert({ 'type': 'danger', 'message': 'Item create error! ' + err });
+      this.alertService.createAlert({ type: 'danger', message: 'Item create error! ' + err });
     });
   }
 
   deleteItem(editItem) {
-    const options = {
+    const option = {
       item: new Group(editItem),
-      ref: this.dataService.serverRefs.GroupRef
+      ref: this.dataService.serverRefs.GroupRef,
     }
-    this.dataService.deleteOne(options).then(() => {
+    this.dataService.deleteOne(option).then(() => {
       console.log('GroupsComponent: deleteItem: success');
-      this.alertService.createAlert({ 'type': 'success', 'message': 'Item deleted' });
+      this.alertService.createAlert({ type: 'success', message: 'Item deleted' });
       this.clearItem();
     }).catch(err => {
       console.log('GroupsComponent: deleteItem: error: ', err);
-      this.alertService.createAlert({ 'type': 'danger', 'message': 'Item delete error! ' + err });
+      this.alertService.createAlert({ type: 'danger', message: 'Item delete error! ' + err });
     });
   }
 
   createMany(count) {
-    const items = [];
+    const options = [];
 
     for (let i = 0; i < count; i++) {
       const obj = {
         title: 'Auto title #' + i,
         description: 'Auto description #' + i,
       };
-      const options = {
+      const option = {
         item: new Group(obj),
-        ref: this.dataService.serverRefs.GroupRef.ref.doc()
-      }
-      items.push(options);
+        ref: this.dataService.serverRefs.GroupRef.ref.doc(),
+      };
+      options.push(option);
     }
 
-    this.dataService.createMany({ 'items': items })
+    this.dataService.createMany(options)
       .then(() => {
         console.log('GroupsComponent: createMany: success!');
-        this.alertService.createAlert({ 'type': 'success', 'message': 'Items created' });
+        this.alertService.createAlert({ type: 'success', message: 'Items created' });
       }, (err) => {
         console.log('GroupsComponent: createMany: error: ', err);
-        this.alertService.createAlert({ 'type': 'danger', 'message': 'Items created error! ' + err });
+        this.alertService.createAlert({ type: 'danger', message: 'Items created error! ' + err });
       })
   }
 
   deleteAll() {
-    const items = [];
+    const options = [];
 
-    for (let i = 0; i < this.groups.length; i++) {
-      const options = {
-        ref: this.dataService.serverRefs.GroupRef.ref.doc(this.groups[i].id)
-      }
-      items.push(options);
+    for (const item of this.groups) {
+      const option = {
+        ref: this.dataService.serverRefs.GroupRef.ref.doc(item.id),
+      };
+      options.push(option);
     }
 
-    this.dataService.deleteMany({ 'items': items })
+    this.dataService.deleteMany(options)
       .then(() => {
         console.log('GroupsComponent: deleteMany: success');
-        this.alertService.createAlert({ 'type': 'success', 'message': 'Items deleted' });
+        this.alertService.createAlert({ type: 'success', message: 'Items deleted' });
         this.clearItem();
       }, (err) => {
         console.log('GroupsComponent: deleteMany: error: ', err);
-        this.alertService.createAlert({ 'type': 'danger', 'message': 'Items deleted error! ' + err });
+        this.alertService.createAlert({ type: 'danger', message: 'Items deleted error! ' + err });
       })
   }
 
   clearItem() {
     this.editItem = null;
   }
-
-
-
 
 }

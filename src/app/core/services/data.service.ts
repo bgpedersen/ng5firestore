@@ -1,57 +1,58 @@
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Activity, ActivityInterface } from '../interfaces/Activity';
 import { Injectable } from '@angular/core';
-import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
-import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
-import { ObservableDatabase, Database } from '../interfaces/Database';
-import * as firebase from 'firebase/app';
+import { CollectionReference, DocumentData, DocumentReference } from '@firebase/firestore-types';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { Subscription } from 'rxjs/Subscription';
+import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
+import * as firebase from 'firebase/app';
+import * as _ from 'lodash';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 import { forkJoin } from 'rxjs/observable/forkJoin';
+import { Subject } from 'rxjs/Subject';
+import { Subscription } from 'rxjs/Subscription';
+import { Activity } from '../interfaces/Activity';
+import { Database, ObservableDatabase } from '../interfaces/Database';
+import { Group } from '../interfaces/Group';
 import { User } from '../interfaces/User';
 import { AuthService } from './auth.service';
-import { DocumentReference, CollectionReference, DocumentData } from '@firebase/firestore-types';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import * as _ from 'lodash';
-import { Group } from '../interfaces/Group';
 
 
 @Injectable()
 export class DataService {
 
-  serverRefs = {
-    'ActivityRef': this.db.collection<Activity>('activities'),
-    'GroupRef': this.db.collection<Group>('groups'),
-    'UserRef': this.db.collection<User>('users')
-  }
+  public serverRefs = {
+    ActivityRef: this.db.collection<Activity>('activities'),
+    GroupRef: this.db.collection<Group>('groups'),
+    UserRef: this.db.collection<User>('users'),
+  };
+
+  public readonly observableDatabase: ObservableDatabase;
 
   // Non-readable database to keep the actual data to be exposed as observables
   private database: Database = {
-    '_User': new BehaviorSubject(null),
-    '_Users': new BehaviorSubject([]),
-    '_Activities': new BehaviorSubject([]),
-    '_Groups': new BehaviorSubject([])
+    _User: new BehaviorSubject(null),
+    _Users: new BehaviorSubject([]),
+    _Activities: new BehaviorSubject([]),
+    _Groups: new BehaviorSubject([]),
   };
-
-  // Readable database that exposes the data as observables
-  public readonly observableDatabase: ObservableDatabase = {
-    'User$': this.database._User.asObservable(),
-    'Users$': this.database._Users.asObservable(),
-    'Activities$': this.database._Activities.asObservable(),
-    'Groups$': this.database._Groups.asObservable()
-  }
 
   constructor(public db: AngularFirestore,
     private angularFireAuth: AngularFireAuth,
     private authService: AuthService) {
+    // Readable database that exposes the data as observables
+    this.observableDatabase = {
+      User$: this.database._User.asObservable(),
+      Users$: this.database._Users.asObservable(),
+      Activities$: this.database._Activities.asObservable(),
+      Groups$: this.database._Groups.asObservable(),
+    };
     this.initDatabase();
   }
 
   // Keeps user up to date and only subscribes to server data when logged in
   initDatabase() {
     this.authService.user$
-      .subscribe(user => {
+      .subscribe((user) => {
         console.log('dataService: initDatabase: user: ', user);
         if (user) {
           // Logged in - update user and subscribe
@@ -69,42 +70,40 @@ export class DataService {
   fetchCollection(ref: AngularFirestoreCollection<any>) {
     return ref
       .snapshotChanges()
-      .map(arr => {
-        return arr.map(snap => {
+      .map((arr) => {
+        return arr.map((snap) => {
           const fromCache = snap.payload.doc.metadata.fromCache;
           console.log('dataService: fetchCollection: map fromCache: ', fromCache);
           const obj = snap.payload.doc.data();
           obj.id = snap.payload.doc.id;
           return obj;
         });
-      })
+      });
   }
 
   fetchDocument(ref: AngularFirestoreDocument<any>) {
     return ref
       .snapshotChanges()
-      .map(snap => {
+      .map((snap) => {
         const fromCache = snap.payload.metadata.fromCache;
         console.log('dataService: fetchActivities: map fromCache: ', fromCache);
         const obj = snap.payload.data();
         obj.id = snap.payload.id;
         return obj;
-      })
-  };
+      });
+  }
 
   // **** Global fetch end
-
-
 
   fetchActivities() {
     this.fetchCollection(this.serverRefs.ActivityRef)
       .subscribe((res: Activity[]) => {
         console.log('dataService: fetchActivities: res: ', res);
         this.getReferences('Activity', res)
-          .then((res: Activity[]) => {
-            console.log('dataService: fetchActivities: after references: res: ', res);
-            this.database._Activities.next(res);
-          })
+          .then((resWithRefs: Activity[]) => {
+            console.log('dataService: fetchActivities: after references: resWithRefs: ', resWithRefs);
+            this.database._Activities.next(resWithRefs);
+          });
       });
   }
 
@@ -113,21 +112,21 @@ export class DataService {
       .subscribe((res: Group[]) => {
         console.log('dataService: fetchGroups: res: ', res);
         this.getReferences('Group', res)
-          .then((res: Group[]) => {
-            console.log('dataService: fetchGroups: after references: res: ', res);
-            this.database._Groups.next(res);
-          })
+          .then((resWithRefs: Group[]) => {
+            console.log('dataService: fetchGroups: after references: resWithRefs: ', resWithRefs);
+            this.database._Groups.next(resWithRefs);
+          });
       });
   }
 
   // Function to get references data and apply it to each item without duplicates
   getReferences(type, items) {
     // console.log('dataService: getReferences: type: ', type, '. items: ', items);
-    let promise = new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
 
-      var allReferences = [];
-      var sortedReferences = [];
-      var observableReferences: Array<Observable<DocumentData>> = [];
+      let allReferences = [];
+      let sortedReferences = [];
+      let observableReferences: Array<Observable<DocumentData>> = [];
 
       // Add all refs in one big array first
       for (let i = 0; i < items.length; i++) {
@@ -218,8 +217,6 @@ export class DataService {
     return promise;
   }
 
-
-
   fetchUsers() {
     this.fetchCollection(this.serverRefs.UserRef)
       .subscribe((res: User[]) => {
@@ -232,7 +229,7 @@ export class DataService {
     // Adding fieldValue will make double read updates because time is added with a delay server-side !!!
     // item.timestamp = firebase.firestore.FieldValue.serverTimestamp();
 
-    let userRef = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
+    const userRef = this.serverRefs.UserRef.doc(this.database._User.getValue().uid).ref;
 
     if (action === 'created') {
       item.relationData.createdBy.ref = userRef;
@@ -248,28 +245,28 @@ export class DataService {
     return item;
   }
 
-  updateOne(options: { item: any, ref: AngularFirestoreCollection<any> }) {
+  updateOne(option: { item: any, ref: AngularFirestoreCollection<any> }) {
     const promise = new Promise((resolve, reject) => {
 
-      if (options.item) {
+      if (option.item) {
         // Add data details
-        options.item = this.addDataDetails(options.item, 'modified');
+        let item = this.addDataDetails(option.item, 'modified');
 
         // Convert object to pure javascript
-        let item = options.item.convertToPureJS();
+        item = item.convertToDatabaseModel();
 
         console.log('dataService: updateOne: update item: ', item);
-        options.ref.doc(item.id)
+        option.ref.doc(item.id)
           .update(item)
           .then(() => {
             console.log('dataService: updateOne success');
             resolve(item.id);
-          }).catch(err => {
+          }).catch((err) => {
             console.error('dataService: updateOne: error: ', err);
             reject(err);
           });
       } else {
-        console.log('dataService: updateOne: wrong options! options: ', options);
+        console.log('dataService: updateOne: wrong option! option: ', option);
         reject();
       }
 
@@ -278,30 +275,30 @@ export class DataService {
     return promise;
   }
 
-  createOne(options: { item: any, ref: AngularFirestoreCollection<any> }) {
+  createOne(option: { item: any, ref: AngularFirestoreCollection<any> }) {
     const promise = new Promise((resolve, reject) => {
 
-      if (options.item) {
+      if (option.item) {
         // Add data details
-        options.item = this.addDataDetails(options.item, 'created');
+        let item = this.addDataDetails(option.item, 'created');
 
         // Convert object to pure javascript
-        let item = options.item.convertToPureJS();
+        item = item.convertToDatabaseModel();
 
         console.log('dataService: createOne: item: ', item);
-        options.ref.ref.add(item)
+        option.ref.ref.add(item)
           .then((res) => {
             console.log('dataService: createOne success: res: ', res);
             resolve(res);
-          }).catch(err => {
+          }).catch((err) => {
             console.error('dataService: createOne: error: ', err);
             reject(err);
           });
       } else {
-        console.log('dataService: createOne: wrong options! options: ', options);
+        console.log('dataService: createOne: wrong option! option: ', option);
         reject();
       }
-    })
+    });
 
     return promise;
   }
@@ -315,7 +312,7 @@ export class DataService {
           .then(() => {
             console.log('dataService: deleteOne success');
             resolve();
-          }).catch(err => {
+          }).catch((err) => {
             console.error('dataService: deleteOne: error: ', err);
             reject(err);
           });
@@ -324,27 +321,25 @@ export class DataService {
         reject();
       }
 
-    })
+    });
 
     return promise;
   }
 
-  createMany(options: { items: any[] }) {
-    console.log('dataService: createMany: options.items: ', options.items);
+  createMany(options: any[]) {
+    console.log('dataService: createMany: options: ', options);
     const promise = new Promise((resolve, reject) => {
       // Create batch
-      let batch = this.db.firestore.batch();
+      const batch = this.db.firestore.batch();
 
-      if (options.items && options.items.length) {
-        for (let i = 0; i < options.items.length && i < 500; i++) {
+      if (options && options.length) {
+        for (const option of options) {
           // Add data details
-          options.items[i].item = this.addDataDetails(options.items[i].item, 'created');
-
+          option.item = this.addDataDetails(option.item, 'created');
           // Convert object to pure javascript
-          let item = options.items[i].item.convertToPureJS();
-
+          option.item = option.item.convertToDatabaseModel();
           // Insert to batch
-          batch.set(options.items[i].ref, item);
+          batch.set(option.ref, option.item);
         }
         // Commit the batch
         batch.commit()
@@ -360,21 +355,21 @@ export class DataService {
         reject();
       }
 
-    })
+    });
 
     return promise;
   }
 
-  deleteMany(options: { items: any[] }) {
-    console.log('dataService: deleteMany: options.items: ', options.items);
+  deleteMany(options: any[]) {
+    console.log('dataService: deleteMany: options: ', options);
     const promise = new Promise((resolve, reject) => {
       // Create batch
-      let batch = this.db.firestore.batch();
+      const batch = this.db.firestore.batch();
 
-      if (options.items && options.items.length) {
-        for (let i = 0; i < options.items.length && i < 500; i++) {
+      if (options && options.length) {
+        for (const option of options) {
           // Insert to batch
-          batch.delete(options.items[i].ref);
+          batch.delete(option.ref);
         }
         // Commit the batch
         batch.commit()
@@ -390,13 +385,9 @@ export class DataService {
         reject();
       }
 
-    })
+    });
 
     return promise;
   }
-
-
-
-
 
 }

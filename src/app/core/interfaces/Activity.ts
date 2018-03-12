@@ -1,17 +1,7 @@
+import * as _ from 'lodash';
 import * as moment from 'moment';
 import { DataModel } from './DataModel';
 import { Relation, Relations } from './Relation';
-
-// interface Foo {
-//   prop: number;
-
-//   a();
-//   b(x: string);
-// }
-
-// export class Bar implements Foo {
-
-// }
 
 export class Activity implements DataModel {
   id?: string;
@@ -21,53 +11,52 @@ export class Activity implements DataModel {
   updatedAt?: Date;
   relationData?: Relations;
   template?: any;
-  databaseModel?: any;
 
   constructor(data?) {
     if (data) {
       Object.assign(this, data);
+    } else {
+      this.id = null;
+      this.title = '';
+      this.description = '';
+      this.relationData = {
+        createdBy: new Relation(),
+        updatedBy: new Relation(),
+        activities: [],
+        groups: [],
+      };
     }
   }
 
-  //  else {
-
-  // this.id = null;
-  // this.title = '';
-  // this.description = '';
-  // this.relationData = {
-  //   'createdBy': (data.relationData && data.relationData.createdBy) ? new Relation(data.relationData.createdBy, keepRelationData) : new Relation(),
-  //   'updatedBy': (data.relationData && data.relationData.updatedBy) ? new Relation(data.relationData.updatedBy, keepRelationData) : new Relation(),
-  //   'groups': (data.relationData && data.relationData.groups) ? this.multipleRelations(data.relationData.groups, keepRelationData) : []
-  //   // 'updatedBy': { 'ref': data.relationData ? data.relationData.updatedBy.ref : null, 'data': null },
-  //   // 'createdBy': { 'ref': data.relationData ? data.relationData.createdBy.ref : null, 'data': null }
-  // };
-
-  // convertToPureJS() {
-  //   throw new Error("Method not implemented.");
-  // }
   convertToDatabaseModel() {
-    throw new Error("Method not implemented.");
+    return {
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      relationData: {
+        createdBy: this.addPureRelation(this.relationData.createdBy),
+        updatedBy: this.addPureRelation(this.relationData.updatedBy),
+        activities: this.addPureRelation(this.relationData.activities),
+        groups: this.addPureRelation(this.relationData.groups),
+      },
+    };
   }
 
-  convertToPureJS() {
-    // Convert object to pure javascript
-    const pureItem = Object.assign({}, this);
-    pureItem.relationData.createdBy = Object.assign({}, pureItem.relationData.createdBy);
-    pureItem.relationData.updatedBy = Object.assign({}, pureItem.relationData.updatedBy);
-    return pureItem;
-  }
-
-  private multipleRelations(relations, keepRelationData) {
-    const newRelations: Relation[] = [];
-
-    for (const relation of relations) {
-      newRelations.push(new Relation(relation, keepRelationData));
+  addPureRelation(data) {
+    if (_.isArray(data)) {
+      const relationArray = [];
+      for (const item of data) {
+        relationArray.push({ ref: item.ref, data: null });
+      }
+      return relationArray;
+    } else {
+      return {
+        ref: data.ref,
+        data: null,
+      };
     }
-
-    // for (let i = 0; i < relations.length; i++) {
-    //   newRelations.push(new Relation(relations[i], keepRelationData));
-    // }
-    return newRelations;
   }
 
 }

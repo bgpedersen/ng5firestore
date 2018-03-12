@@ -13,7 +13,7 @@
 
         <div class="col-2">
           <h2>
-            Activities
+            Groups
           </h2>
 
           <button (click)="newItem()"
@@ -26,7 +26,7 @@
             max="500"
             [(ngModel)]="count">
 
-          <button [disabled]="activities.length === 0"
+          <button [disabled]="groups.length === 0"
             (click)="deleteAll()"
             class="btn btn-outline-danger">Delete all</button>
         </div>
@@ -36,13 +36,13 @@
         <div class="col-4">
           <div class="list">
             <div class="list-top">
-              <h3>List of activities
-                <span class="badge badge-pill badge-info pull-right">{{activities ? activities.length : 0}}</span>
+              <h3>List of groups
+                <span class="badge badge-pill badge-info pull-right">{{groups ? groups.length : 0}}</span>
               </h3>
             </div>
 
             <ul class="list-group">
-              <li *ngFor="let item of activities"
+              <li *ngFor="let item of groups"
                 class="list-group-item"
                 [ngClass]="{'active': editItem && item.id === editItem.id}"
                 (click)="getItem(item.id)">
