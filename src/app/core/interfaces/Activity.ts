@@ -10,6 +10,7 @@ export class Activity implements DataModel {
   createdAt?: Date;
   updatedAt?: Date;
   relationData?: Relations;
+  relationsById: any;
   template?: any;
 
   constructor(data?) {
@@ -25,6 +26,7 @@ export class Activity implements DataModel {
         activities: [],
         groups: [],
       };
+      this.relationsById = {}
     }
   }
 
@@ -41,6 +43,7 @@ export class Activity implements DataModel {
         activities: this.addPureRelation(this.relationData.activities),
         groups: this.addPureRelation(this.relationData.groups),
       },
+      relationsById: this.relationsById,
     };
   }
 

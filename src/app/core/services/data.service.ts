@@ -16,7 +16,6 @@ import { Group } from '../interfaces/Group';
 import { User } from '../interfaces/User';
 import { AuthService } from './auth.service';
 
-
 @Injectable()
 export class DataService {
 
@@ -28,11 +27,14 @@ export class DataService {
 
   public readonly observableDatabase: ObservableDatabase;
 
+  private listeners = [];
+
   // Non-readable database to keep the actual data to be exposed as observables
   private database: Database = {
     _User: new BehaviorSubject(null),
     _Users: new BehaviorSubject([]),
     _Activities: new BehaviorSubject([]),
+    _ActivitiesByGroupId: new BehaviorSubject([]),
     _Groups: new BehaviorSubject([]),
   };
 
@@ -44,6 +46,7 @@ export class DataService {
       User$: this.database._User.asObservable(),
       Users$: this.database._Users.asObservable(),
       Activities$: this.database._Activities.asObservable(),
+      ActivitiesByGroupId$: this.database._ActivitiesByGroupId.asObservable(),
       Groups$: this.database._Groups.asObservable(),
     };
     this.initDatabase();
@@ -57,13 +60,150 @@ export class DataService {
         if (user) {
           // Logged in - update user and subscribe
           this.database._User.next(user);
-          this.fetchActivities();
+          // this.fetchActivities();
+
           this.fetchGroups();
           this.fetchUsers();
+
+          // Listen on Group collection change and fetch activities with group ids
+          this.database._Groups.subscribe((groups) => {
+
+            console.log('dataService: initDatabase: this.database._Groups.subscribe((groups): ', groups);
+            if (groups.length) {
+              this.fetchActivitiesWithGroups(groups);
+            }
+          });
+
         } else {
           // Kill subscribes ?
         }
-      })
+      });
+  }
+
+  //   const size$ = new Subject<string>();
+  // const queryObservable = size$.switchMap(size =>
+  //   afs.collection('items', ref => ref.where('size', '==', size)).valueChanges();
+  // );
+
+  // // subscribe to changes
+  // queryObservable.subscribe(queriedItems => {
+  //   console.log(queriedItems);
+  // });
+
+  // // trigger the query
+  // size$.next('large');
+
+  // // re-trigger the query!!!
+  // size$.next('small');
+
+  fetchActivitiesWithGroups(groups) {
+    const observableFilterCollections = [];
+    for (const group of groups) {
+      observableFilterCollections.push(this.fetchActivitiesByGroupId(group.id));
+    }
+
+    combineLatest<any[]>(observableFilterCollections)
+      .subscribe((res: any[]) => {
+        console.log('dataService: fetchActivitiesWithGroups: res: ', res);
+        let convertedRes = [];
+        convertedRes = _.flatten(res);
+        convertedRes = _.uniqBy(convertedRes, 'id');
+        console.log('dataService: fetchActivitiesWithGroups: convertedRes: ', convertedRes);
+        this.database._ActivitiesByGroupId.next(convertedRes);
+      });
+
+    // let query = this.db.collection<Activity>('activities', (ref) => ref.where('relationsById.' + groups[0].id, '==', true));
+    // this.fetchCollection(query)
+    //   .subscribe((res: Activity[]) => {
+    //     console.log('dataService: fetchActivities: res: ', res);
+    //     this.database._ActivitiesByGroupId.next(res);
+    //   });
+
+
+    // OBS: Nothing is checking which groups with activity collections is currently being streamed - listener seems just to be a function and not something to be cancelled
+    // const listeners = [];
+    // for (const group of groups) {
+    //   listeners.push(this.fetchActivitiesByGroupId(group.id));
+    // }
+    // console.log('dataService: fetchActivitiesWithGroups: listeners: ', listeners);
+
+    // // combineLatest<any[]>(listeners)
+    // //   .subscribe((res: any[]) => {
+    // Promise.all(listeners).then(res => {
+    //   console.log('dataService: fetchActivitiesWithGroups: res: ', res);
+    //   const newFetches = [];
+    //   res.forEach((querySnapshot) => {
+    //     console.log('dataService: fetchActivitiesWithGroups: querySnapshot.metadata.fromCache: ', querySnapshot.metadata.fromCache);
+    //     console.log('dataService: fetchActivitiesWithGroups: querySnapshot: ', querySnapshot);
+
+    //     querySnapshot.docs.forEach((doc) => {
+    //       console.log('dataService: fetchActivitiesWithGroups: doc.metadata.fromCache: ', doc.metadata.fromCache);
+    //       console.log('dataService: fetchActivitiesWithGroups: doc: ', doc);
+
+    //       const activity = doc.data();
+    //       activity.id = doc.id;
+    //       newFetches.push(activity);
+    //     });
+    //   });
+    //   console.log('dataService: fetchActivitiesWithGroups: newFetches: ', newFetches);
+    //   // Get current activities array
+    //   const existingActivities = this.database._ActivitiesByGroupId.getValue();
+    //   // Add new activity to array if not already exists
+    //   for (const newFetch of newFetches) {
+    //     const exists = _.findIndex(existingActivities, { id: newFetch.id });
+    //     if (exists === -1) {
+    //       existingActivities.push(newFetch);
+    //     }
+    //   }
+    //   console.log('dataService: fetchActivitiesWithGroups: existingActivities: ', existingActivities);
+    //   // Update observable with new array
+    //   this.database._ActivitiesByGroupId.next(existingActivities);
+    // });
+
+    // this.fetchActivitiesByGroupId('47zT1Hnq6HlN5TVOAumG');
+    // this.fetchActivitiesByGroupId('87DjrXy3wYZsybYcGGLY');
+    // this.fetchActivitiesByGroupId('B65mO7qeJAMXxUzkiM2e');
+    // this.fetchActivitiesByGroupId('BfnApPg3dU3M7kemJU65');
+  }
+
+  fetchActivitiesByGroupId(id) {
+    console.log('dataService: fetchActivitiesByGroupId: id: ', id);
+    const query = this.db.collection<Activity>('activities', (ref) => ref.where('relationsById.' + id, '==', true));
+    return this.fetchCollection(query);
+
+
+    // return new Promise((resolve, reject) => {
+    //   this.serverRefs.ActivityRef.ref.where('relationsById.' + id, '==', true).get().then((querySnapshot) => {
+    //     resolve(querySnapshot);
+    //   });
+    // });
+
+    // return this.serverRefs.ActivityRef.ref.where('relationsById.' + id, '==', true).onSnapshot((res) => res);
+
+    // const queryRef = this.serverRefs.ActivityRef.ref.where('relationsById.' + id, '==', true);
+    // queryRef.onSnapshot((querySnapshot) => {
+
+    //   const newFetches = [];
+    //   querySnapshot.forEach((doc) => {
+    //     console.log('dataService: fetchActivitiesByGroupId: doc.metadata.fromCache: ', doc.metadata.fromCache);
+    //     console.log('dataService: fetchActivitiesByGroupId: doc: ', doc);
+    //     const activity = doc.data();
+    //     activity.id = doc.id;
+    //     newFetches.push(activity);
+    //   });
+    //   // Get current activities array
+    //   const existingActivities = this.database._ActivitiesByGroupId.getValue();
+    //   // Add new activity to array if not already exists
+    //   for (const newFetch of newFetches) {
+    //     const exists = _.findIndex(existingActivities, { id: newFetch.id });
+    //     if (exists === -1) {
+    //       existingActivities.push(newFetch);
+    //     }
+    //   }
+    //   console.log('dataService: fetchActivitiesByGroupId: existingActivities: ', existingActivities);
+    //   // Update observable with new array
+    //   this.database._ActivitiesByGroupId.next(existingActivities);
+    // });
   }
 
   // **** Global fetch collection/document and apply data information - returns observable
@@ -245,7 +385,7 @@ export class DataService {
     return item;
   }
 
-  updateOne(option: { item: any, ref: AngularFirestoreCollection<any> }) {
+  updateOne(option: { item: any, ref: AngularFirestoreCollection<any>, type?: string }) {
     const promise = new Promise((resolve, reject) => {
 
       if (option.item) {
@@ -275,12 +415,24 @@ export class DataService {
     return promise;
   }
 
-  createOne(option: { item: any, ref: AngularFirestoreCollection<any> }) {
+  createOne(option: { item: any, ref: AngularFirestoreCollection<any>, type?: string }) {
     const promise = new Promise((resolve, reject) => {
+
+      console.log('dataService: createOne: option: ', option);
 
       if (option.item) {
         // Add data details
         let item = this.addDataDetails(option.item, 'created');
+
+        // Add random groups to activity
+        if (option.type === 'Activity') {
+          const groups = this.database._Groups.getValue();
+          console.log('dataService: createOne: groups: ', groups);
+          for (const group of groups) {
+            // item.relationsById[group.id] = this.db.collection('Groups').doc(group.id).ref;
+            item.relationsById[group.id] = true;
+          }
+        }
 
         // Convert object to pure javascript
         item = item.convertToDatabaseModel();

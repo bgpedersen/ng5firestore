@@ -34,8 +34,10 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('ActivitiesComponent loaded');
 
-    this.refSubs.activitiesSub = this.dataService.observableDatabase.Activities$
+    // this.refSubs.activitiesSub = this.dataService.observableDatabase.Activities$
+    this.refSubs.activitiesSub = this.dataService.observableDatabase.ActivitiesByGroupId$
       .subscribe((res: Activity[]) => {
+        console.log('ActivitiesComponent activities: res: ', res);
         this.activities = this.convertItems(res);
       });
   }
@@ -99,6 +101,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     const option = {
       item: editItem,
       ref: this.dataService.serverRefs.ActivityRef,
+      type: 'Activity',
     };
 
     this.dataService.createOne(option)
